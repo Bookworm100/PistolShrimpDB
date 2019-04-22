@@ -8,6 +8,13 @@ import ast
 # size of blocks of memory in bytes
 blockSize = 1000
 
+""" handleInput will be used to execute commands to change the key value """
+""" store. This will soon handle insertions, deletions, select statements, """
+""" update statements, and search statements. """
+def handleInput(command, dynamicDB):
+    # check the inputs
+    return dynamicDB
+
 """ setUpDatabase initilizes the key value store from an existing JSON """
 """ file. Currently, the JSON file is from                             """
 """ https://data.cdc.gov/api/views/cjae-szjv/rows.json?accessType=DOWNLOAD """
@@ -58,10 +65,12 @@ def setUpDatabase(filename):
 """ necessary, and when the key value store is closed, any changes are """
 """ written to the file which stores the key value store. """
 if __name__ == "__main__":
+    print("Loading...\n")
     dynamicDB = {}
     defaultFile = 'AirQualityMeasures.json'
     storageDBFile = 'AirQualityDBStore.bin'
-    # load existing key value file, into a dictionary,
+    isNewDBFile = False
+    # Load existing key value file, into a dictionary,
     # or create a new dictionary loaded to the file
     # later.
     if os.path.isfile(storageDBFile):
@@ -71,6 +80,7 @@ if __name__ == "__main__":
         for row in rows:
             dynamicDB.update(ast.literal_eval(row))
     else:
+        isNewDBFile = True
         if os.path.isfile(defaultFile):
             dynamicDB = setUpDatabase(defaultFile)
         else:
@@ -79,19 +89,27 @@ if __name__ == "__main__":
                             'szjv/rows.json?accessType=DOWNLOAD for setup! '
                             'Title it AirQualityMeasures.json.')
 
-    # TODO:
-    # Ideally we'd allow for user input and necessary
-    # operations at this point
+    # This section handles user input and passes it to
+    # the handleInput function to change the key value
+    # store.
+    n = "Default string"
+    while n != "quit" or n != "abort" or n != "exit":
+        n = input("Welcome to AirQualityStoreDB! Exit with exit or quit if you"
+                  " want your changes saved, or with abort if you don't.\n")
+        dynamicDB = handleInput(n, dynamicDB)
 
     # Once the key value store is to be closed, we save any changes.
-    # TODO: only save changes instead of rewriting the whole file
-    filename = 'itemsBin.bin'
+    # If the key value store file didn't exist yet, then
+    # a new one is created here.
     c = 0
-    with open(filename, 'wb') as file:
-        for item in dynamicDB:
-            toWrite = '{' + json.dumps(item) + ': ' + \
-                    json.dumps(dynamicDB[item]) + '}' + '\n'
-            toByte = toWrite.encode('utf-8')
-            file.write(toByte)
-            file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
-            c += 1
+    if isNewDBFile:
+        with open(storageDBFile, 'wb') as file:
+            for item in dynamicDB:
+                toWrite = '{' + json.dumps(item) + ': ' + \
+                        json.dumps(dynamicDB[item]) + '}' + '\n'
+                toByte = toWrite.encode('utf-8')
+                file.write(toByte)
+                file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
+                c += 1
+    # To do: implement based on changes
+    # else:
