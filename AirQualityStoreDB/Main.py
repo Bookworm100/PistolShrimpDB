@@ -13,7 +13,20 @@ import string
 blockSize = 1000
 # set of acceptable columns
 typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
-            'countyName', 'Year', 'Measurement', 'Units', 'Unit Symbol'}
+            'countyName', 'year', 'measurement', 'units', 'unitSymbol'}
+
+""" For now, we are just appending to the end of the file. Once delete """
+""" is fully implemented, the data will be changed to read/write where tags """
+""" are 0, and then appending afterwards. (Positions where deletions """
+""" happened will need to be recorded). """
+def updateFileWithInserts(storageDbFile, insertedRows):
+    with open(storageDbFile, 'a+b') as file1:
+        for item1 in insertedRows:
+            toWrite1 = '{' + json.dumps(item1) + ': ' + \
+                       json.dumps(insertedRows[item1]) + '}' + '\n'
+            toByte1 = toWrite1.encode('utf-8')
+            file1.write(('\0'*(blockSize-sys.getsizeof(toByte1))).encode('utf-8'))
+            file1.write(toByte1)
 
 """ performTempDeletion removes the values or values assicated with the key """
 """ from the dictionary holding the database, and keep track of what might """
@@ -25,17 +38,38 @@ def performTempDeletion(key, values):
 """ store, and keep track of what should get added to the storage file """
 """ upon exiting or quitting. """
 def generateNewRows(colValList):
-    return {}
+    # Question: Should I enforce id/name restriction?
+    # check that all columns are valid, and build up a dictionary.
+    # By looping through every pair, and
+    newValues = {}
+    if len(colValList) % 2 == 1:
+        print("Tags must be associated with column values! \n Usage:\n INSERT "
+              "[key] WITH "
+              "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
+                " col2=tag2, col3=tag3...)")
+        return {}
+    for i in range(0, len(colValList), 2):
+        if colValList[i] in typesSet:
+            newValues[colValList[i]] = colValList[i+1]
+        else:
+            print("Invalid tag type!\n Usage:\n INSERT [key] WITH "
+                  "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
+                  " col2=tag2, col3=tag3...) \n And tags must be "
+                  "one of measureId, measureDesc, stateId, stateName, "
+                  "countyId,"
+                  "countyName, year, measurement, units, unitSymbol")
+            return {}
+    return newValues
 
 """ generateRandomKey generates a random key to be used when inserting new """
 """ values to the dictionary key value store. """
 def generateRandomKey():
-    key = 'row-'.join(random.choices(string.ascii_letters +
+    key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
                                      string.digits, k=4))
-    key = key.join(random.choices('!@#$%^&~_-.+=', k=1))
-    key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
-    key = key.join(random.choices('!@#$%^&~_-.+=', k=1))
-    key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
+    key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
+    key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+    key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
+    key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
 """ handleInput will be used to execute commands to change the key value """
@@ -46,7 +80,7 @@ def generateRandomKey():
 """ while also returning nothing."""
 def handleInput(command, dynamicDB):
     # check the inputs
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+=]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(command)
     key = ''
     values = {}
@@ -54,31 +88,32 @@ def handleInput(command, dynamicDB):
         if matches[2].lower() == 'with' and matches[3].lower() == 'values'\
                 and len(matches) >= 5:
             # check if key already exists in the key value store
+            key = matches[1].lower()
             if key in dynamicDB:
                 print("Key already in key value store. Selecting new random "
                       "key instead...\n")
                 while key in dynamicDB:
                     key = generateRandomKey()
-            else:
-                # TODO: support input keys with alphanumeric instead of letters
-                key = matches[1].lower()
             matches = matches[4:]
             values = generateNewRows(matches)
         elif matches[1].lower() == 'values' and len(matches) >= 3:
             matches = matches[2:]
+            while key in dynamicDB or key == '':
+                key = generateRandomKey()
             values = generateNewRows(matches)
         else:
             print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
                   "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
                   " col2=tag2, col3=tag3...)")
             return {}
-        return values
+        if values != {}:
+            return {key: {'isFree':'false', 'data':values}}
     elif matches[0].lower() == 'delete':
-        if matches[1].lower() == 'values' and len(matches) == 3:
+        if matches[1].lower() == 'values' and len(matches) >= 3:
             matches = matches[2:]
         elif len(matches) == 2:
-            if key in dynamicDB:
-                key = m[1].lower()
+            if matches[1].lower() in dynamicDB:
+                key = matches[1].lower()
                 matches = matches[1]
             else:
                 print("The key is not in the store!")
@@ -89,6 +124,7 @@ def handleInput(command, dynamicDB):
                           " col2=tag2, col3=tag3...)")
             return {}
         performTempDeletion(key, matches)
+    # may need to include deleted rows too
     return {}
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
@@ -122,11 +158,11 @@ def setUpDatabase(filename):
         values['stateName'] = measurement[13]
         values['countyId'] = measurement[14]
         values['countyName'] = measurement[15]
-        values['Year'] = measurement[16]
+        values['year'] = measurement[16]
         values['measurement'] = measurement[17]
         if measurement[18] != "No Units":
-            values['Units'] = measurement[18]
-            values['Unit Symbol'] = measurement[19]
+            values['units'] = measurement[18]
+            values['unitSymbol'] = measurement[19]
         items['data'] = values
         measurementStore[measurement[0]] = items
 
@@ -144,6 +180,7 @@ if __name__ == "__main__":
     print("Loading...\n")
     dynamicDB = {}
     defaultFile = 'AirQualityMeasures.json'
+    # Change this before committing
     storageDBFile = 'AirQualityDBStore.bin'
     isNewDBFile = False
     insertedRows = {}
@@ -180,19 +217,23 @@ if __name__ == "__main__":
         newRows = handleInput(n, dynamicDB)
         dynamicDB.update(newRows)
         insertedRows.update(newRows)
+        if newRows != {}:
+            print("Successfully inserted ",newRows, "\n")
 
     # Once the key value store is to be closed, we save any changes.
     # If the key value store file didn't exist yet, then
     # a new one is created here.
-    c = 0
-    if isNewDBFile:
-        with open(storageDBFile, 'wb') as file:
-            for item in dynamicDB:
-                toWrite = '{' + json.dumps(item) + ': ' + \
-                        json.dumps(dynamicDB[item]) + '}' + '\n'
-                toByte = toWrite.encode('utf-8')
-                file.write(toByte)
-                file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
-                c += 1
-    # TODO: implement based on changes
-    # else:
+    if toSave:
+        c = 0
+        if isNewDBFile:
+            with open(storageDBFile, 'wb') as file:
+                for item in dynamicDB:
+                    toWrite = '{' + json.dumps(item) + ': ' + \
+                            json.dumps(dynamicDB[item]) + '}' + '\n'
+                    toByte = toWrite.encode('utf-8')
+                    file.write(toByte)
+                    file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
+                    c += 1
+        # TODO: Finish implementing based on changes
+        # deletions come first as they update the tags
+        updateFileWithInserts(storageDBFile, insertedRows)
