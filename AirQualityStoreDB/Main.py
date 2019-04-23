@@ -15,10 +15,16 @@ blockSize = 1000
 typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
             'countyName', 'Year', 'Measurement', 'Units', 'Unit Symbol'}
 
+""" performTempDeletion removes the values or values assicated with the key """
+""" from the dictionary holding the database, and keep track of what might """
+""" be removed from the storage file upon exiting or quitting. """
+def performTempDeletion(key, values):
+    return {}
+
 """ generateNewRows will insert the new values to the dictionary key value """
 """ store, and keep track of what should get added to the storage file """
 """ upon exiting or quitting. """
-def generateNewRows():
+def generateNewRows(colValList):
     return {}
 
 """ generateRandomKey generates a random key to be used when inserting new """
@@ -26,9 +32,9 @@ def generateNewRows():
 def generateRandomKey():
     key = 'row-'.join(random.choices(string.ascii_letters +
                                      string.digits, k=4))
-    key = key.join(random.choices('!@#$%^&*()>_-+=', k=1))
+    key = key.join(random.choices('!@#$%^&~_-.+=', k=1))
     key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
-    key = key.join(random.choices('!@#$%^&*()>_-+=', k=1))
+    key = key.join(random.choices('!@#$%^&~_-.+=', k=1))
     key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
     return key
 
@@ -40,12 +46,13 @@ def generateRandomKey():
 """ while also returning nothing."""
 def handleInput(command, dynamicDB):
     # check the inputs
-    parser = re.compile(r'[a-z*]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+=]+', re.IGNORECASE)
     matches = parser.findall(command)
     key = ''
     values = {}
     if matches[0].lower() == 'insert':
-        if matches[2].lower() == 'with' and matches[3].lower() == 'values':
+        if matches[2].lower() == 'with' and matches[3].lower() == 'values'\
+                and len(matches) >= 5:
             # check if key already exists in the key value store
             if key in dynamicDB:
                 print("Key already in key value store. Selecting new random "
@@ -54,10 +61,10 @@ def handleInput(command, dynamicDB):
                     key = generateRandomKey()
             else:
                 # TODO: support input keys with alphanumeric instead of letters
-                key = m[1].lower()
+                key = matches[1].lower()
             matches = matches[4:]
             values = generateNewRows(matches)
-        elif matches[1].lower() == 'values':
+        elif matches[1].lower() == 'values' and len(matches) >= 3:
             matches = matches[2:]
             values = generateNewRows(matches)
         else:
@@ -66,6 +73,22 @@ def handleInput(command, dynamicDB):
                   " col2=tag2, col3=tag3...)")
             return {}
         return values
+    elif matches[0].lower() == 'delete':
+        if matches[1].lower() == 'values' and len(matches) == 3:
+            matches = matches[2:]
+        elif len(matches) == 2:
+            if key in dynamicDB:
+                key = m[1].lower()
+                matches = matches[1]
+            else:
+                print("The key is not in the store!")
+                return {}
+        else:
+            print("Delete format is incorrect. Usage:\n DELETE [key] "
+                   " \n DELETE VALUES (col=tag,"
+                          " col2=tag2, col3=tag3...)")
+            return {}
+        performTempDeletion(key, matches)
     return {}
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
@@ -146,10 +169,14 @@ if __name__ == "__main__":
     # This section handles user input and passes it to
     # the handleInput function to change the key value
     # store.
-    n = "Default string"
-    while n != "quit" or n != "abort" or n != "exit":
+    toSave = True
+    while True:
         n = input("Welcome to AirQualityStoreDB! Exit with exit or quit if you"
                   " want your changes saved, or with abort if you don't.\n")
+        if n == "quit" or n == "abort" or n == "exit":
+            if n == "abort":
+                toSave = False
+            break
         newRows = handleInput(n, dynamicDB)
         dynamicDB.update(newRows)
         insertedRows.update(newRows)
