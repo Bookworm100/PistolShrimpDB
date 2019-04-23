@@ -20,12 +20,14 @@ typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
 """ are 0, and then appending afterwards. (Positions where deletions """
 """ happened will need to be recorded). """
 def updateFileWithInserts(storageDbFile, insertedRows):
+    # TODO: Change insert to depend on the output from delete
     with open(storageDbFile, 'a+b') as file1:
         for item1 in insertedRows:
             toWrite1 = '{' + json.dumps(item1) + ': ' + \
                        json.dumps(insertedRows[item1]) + '}' + '\n'
             toByte1 = toWrite1.encode('utf-8')
-            file1.write(('\0'*(blockSize-sys.getsizeof(toByte1))).encode('utf-8'))
+            file1.write(('\0'*(blockSize-sys.getsizeof(toByte1)))
+                        .encode('utf-8'))
             file1.write(toByte1)
 
 """ performTempDeletion removes the values or values assicated with the key """
@@ -38,7 +40,7 @@ def performTempDeletion(key, values):
 """ store, and keep track of what should get added to the storage file """
 """ upon exiting or quitting. """
 def generateNewRows(colValList):
-    # Question: Should I enforce id/name restriction?
+    # TODO: Should I enforce id/name restriction?
     # check that all columns are valid, and build up a dictionary.
     # By looping through every pair, and
     newValues = {}
@@ -72,6 +74,96 @@ def generateRandomKey():
     key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
+def handleUpdates(matches, dynamicDB):
+    print("Not yet implemented!")
+
+def handleSearches(matches, dynamicDB):
+    print("Not yet implemented!")
+
+def handleSelects(matches, dynamicDB):
+    # return nothing
+    # TODO: Finish implementing with more complicated selects.
+    if matches[1] == '*':
+        if len(matches) == 2 or (len(matches) == 4 and
+                                 matches[2].lower() == 'from' and
+                                 matches[3].lower() == 'keys'):
+            # This is the SELECT * FROM all keys
+            # TODO: might write to file instead
+            with open('allKeys.txt', 'w') as file:
+                for item in dynamicDB:
+                    toWrite = json.dumps(item) + '\n'
+                    file.write(toWrite)
+            # for item in dynamicDB:
+            #    print(item, ", ")
+        elif len(matches) == 4 and (matches[2].lower() == 'from' and
+                                    matches[3].lower() == 'values'):
+            with open('allValues.txt', 'w') as file:
+                for item in dynamicDB:
+                    toWrite = json.dumps(dynamicDB[item]) + '\n'
+                    file.write(toWrite)
+            # for item in dynamicDB:
+            #    print(dynamicDB[item], ", ")
+        elif len(matches) == 4 and (matches[2].lower() == 'from' and
+                                    matches[3].lower() == 'all'):
+            with open('allKeysValues.txt', 'w') as file:
+                for item in dynamicDB:
+                    toWrite = '{' + json.dumps(item) + ': ' + \
+                              json.dumps(dynamicDB[item]) + '}' + '\n'
+                    file.write(toWrite)
+    elif (len(matches) == 2) or (len(matches) == 4 and
+                                 matches[2].lower() == 'from' and
+                                 matches[3].lower() == 'all'):
+        if matches[1].lower() in dynamicDB:
+            print(dynamicDB[matches[1].lower()], '\n')
+    else:
+        print("This part is not implemented yet!\n")
+
+def handleDeletes(matches, dynamicDB):
+    if matches[1].lower() == 'values' and len(matches) >= 3:
+        matches = matches[2:]
+    elif len(matches) == 2:
+        if matches[1].lower() in dynamicDB:
+            key = matches[1].lower()
+            matches = matches[1]
+        else:
+            print("The key is not in the store!")
+            return {}
+    else:
+        print("Delete format is incorrect. Usage:\n DELETE [key] "
+              " \n DELETE VALUES (col=tag,"
+              " col2=tag2, col3=tag3...)")
+        return {}
+    performTempDeletion(key, matches)
+    return {}
+
+def handleInserts(matches, dynamicDB):
+    key = ''
+    values = {}
+    if matches[2].lower() == 'with' and matches[3].lower() == 'values' \
+            and len(matches) >= 5:
+        # check if key already exists in the key value store
+        key = matches[1].lower()
+        if key in dynamicDB:
+            print("Key already in key value store. Selecting new random "
+                  "key instead...\n")
+            while key in dynamicDB:
+                key = generateRandomKey()
+        matches = matches[4:]
+        values = generateNewRows(matches)
+    elif matches[1].lower() == 'values' and len(matches) >= 3:
+        matches = matches[2:]
+        while key in dynamicDB or key == '':
+            key = generateRandomKey()
+        values = generateNewRows(matches)
+    else:
+        print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
+              "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
+              " col2=tag2, col3=tag3...)")
+        return {}
+    if values != {}:
+        return {key: {'isFree': 'false', 'data': values}}
+
+
 """ handleInput will be used to execute commands to change the key value """
 """ store. This will soon handle insertions, deletions, select statements, """
 """ update statements, and search statements. Insert commands will return """
@@ -79,52 +171,24 @@ def generateRandomKey():
 """ and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
 """ while also returning nothing."""
 def handleInput(command, dynamicDB):
+    # TODO: Chop up this function to helper functions. It's getting long.
     # check the inputs
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(command)
     key = ''
     values = {}
     if matches[0].lower() == 'insert':
-        if matches[2].lower() == 'with' and matches[3].lower() == 'values'\
-                and len(matches) >= 5:
-            # check if key already exists in the key value store
-            key = matches[1].lower()
-            if key in dynamicDB:
-                print("Key already in key value store. Selecting new random "
-                      "key instead...\n")
-                while key in dynamicDB:
-                    key = generateRandomKey()
-            matches = matches[4:]
-            values = generateNewRows(matches)
-        elif matches[1].lower() == 'values' and len(matches) >= 3:
-            matches = matches[2:]
-            while key in dynamicDB or key == '':
-                key = generateRandomKey()
-            values = generateNewRows(matches)
-        else:
-            print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
-                  "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
-                  " col2=tag2, col3=tag3...)")
-            return {}
-        if values != {}:
-            return {key: {'isFree':'false', 'data':values}}
+        return handleInserts(matches, dynamicDB)
     elif matches[0].lower() == 'delete':
-        if matches[1].lower() == 'values' and len(matches) >= 3:
-            matches = matches[2:]
-        elif len(matches) == 2:
-            if matches[1].lower() in dynamicDB:
-                key = matches[1].lower()
-                matches = matches[1]
-            else:
-                print("The key is not in the store!")
-                return {}
-        else:
-            print("Delete format is incorrect. Usage:\n DELETE [key] "
-                   " \n DELETE VALUES (col=tag,"
-                          " col2=tag2, col3=tag3...)")
-            return {}
-        performTempDeletion(key, matches)
-    # may need to include deleted rows too
+        return handleDeletes(matches, dynamicDB)
+    elif matches[0].lower() == 'select':
+        handleSelects(matches, dynamicDB)
+    elif matches[0].lower() == 'search':
+        handleSearches(matches, dynamicDB)
+    elif matches[0].lower() == 'update':
+        handleUpdates(matches, dynamicDB)
+
+    # TODO: output may need to include deleted rows too and/or their positions
     return {}
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
