@@ -4,16 +4,69 @@ import os.path
 import json
 import sys
 import ast
+import re
+import random
+import string
 
+# Note: all global variables will not be modified
 # size of blocks of memory in bytes
 blockSize = 1000
+# set of acceptable columns
+typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
+            'countyName', 'Year', 'Measurement', 'Units', 'Unit Symbol'}
+
+""" generateNewRows will insert the new values to the dictionary key value """
+""" store, and keep track of what should get added to the storage file """
+""" upon exiting or quitting. """
+def generateNewRows():
+    return {}
+
+""" generateRandomKey generates a random key to be used when inserting new """
+""" values to the dictionary key value store. """
+def generateRandomKey():
+    key = 'row-'.join(random.choices(string.ascii_letters +
+                                     string.digits, k=4))
+    key = key.join(random.choices('!@#$%^&*()>_-+=', k=1))
+    key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
+    key = key.join(random.choices('!@#$%^&*()>_-+=', k=1))
+    key = key.join(random.choices(string.ascii_letters + string.digits, k=4))
+    return key
 
 """ handleInput will be used to execute commands to change the key value """
 """ store. This will soon handle insertions, deletions, select statements, """
-""" update statements, and search statements. """
+""" update statements, and search statements. Insert commands will return """
+""" the new rows, Delete statements will simply change the tag values  """
+""" and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
+""" while also returning nothing."""
 def handleInput(command, dynamicDB):
     # check the inputs
-    return dynamicDB
+    parser = re.compile(r'[a-z*]+', re.IGNORECASE)
+    matches = parser.findall(command)
+    key = ''
+    values = {}
+    if matches[0].lower() == 'insert':
+        if matches[2].lower() == 'with' and matches[3].lower() == 'values':
+            # check if key already exists in the key value store
+            if key in dynamicDB:
+                print("Key already in key value store. Selecting new random "
+                      "key instead...\n")
+                while key in dynamicDB:
+                    key = generateRandomKey()
+            else:
+                # TODO: support input keys with alphanumeric instead of letters
+                key = m[1].lower()
+            matches = matches[4:]
+            values = generateNewRows(matches)
+        elif matches[1].lower() == 'values':
+            matches = matches[2:]
+            values = generateNewRows(matches)
+        else:
+            print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
+                  "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
+                  " col2=tag2, col3=tag3...)")
+            return {}
+        return values
+    return {}
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
 """ file. Currently, the JSON file is from                             """
@@ -70,6 +123,7 @@ if __name__ == "__main__":
     defaultFile = 'AirQualityMeasures.json'
     storageDBFile = 'AirQualityDBStore.bin'
     isNewDBFile = False
+    insertedRows = {}
     # Load existing key value file, into a dictionary,
     # or create a new dictionary loaded to the file
     # later.
@@ -96,7 +150,9 @@ if __name__ == "__main__":
     while n != "quit" or n != "abort" or n != "exit":
         n = input("Welcome to AirQualityStoreDB! Exit with exit or quit if you"
                   " want your changes saved, or with abort if you don't.\n")
-        dynamicDB = handleInput(n, dynamicDB)
+        newRows = handleInput(n, dynamicDB)
+        dynamicDB.update(newRows)
+        insertedRows.update(newRows)
 
     # Once the key value store is to be closed, we save any changes.
     # If the key value store file didn't exist yet, then
@@ -111,5 +167,5 @@ if __name__ == "__main__":
                 file.write(toByte)
                 file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
                 c += 1
-    # To do: implement based on changes
+    # TODO: implement based on changes
     # else:
