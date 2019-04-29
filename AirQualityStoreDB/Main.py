@@ -214,9 +214,10 @@ def setUpDatabase(filename):
     # Set up the key value store dictionary, which is
     # written to the file at a later point.
     measurementStore = {}
+    positionCounter = 1
     for measurement in airMeasurements['data']:
         # Free or not? 0 indicates not free, 1 indicates free
-        items = dict(isFree='false')
+        items = dict(isFree='false', position=positionCounter)
         values = dict()
         values['measureId'] = measurement[8]
         values['measureDesc'] = measurement[9]
@@ -231,6 +232,7 @@ def setUpDatabase(filename):
             values['unitSymbol'] = measurement[19]
         items['data'] = values
         measurementStore[measurement[0]] = items
+        positionCounter += 1
 
     return measurementStore
 
@@ -297,8 +299,10 @@ if __name__ == "__main__":
                     toWrite = '{' + json.dumps(item) + ': ' + \
                             json.dumps(dynamicDB[item]) + '}' + '\n'
                     toByte = toWrite.encode('utf-8')
+                    file.write(('\0' * (blockSize - sys.getsizeof(toByte)))
+                                .encode('utf-8'))
                     file.write(toByte)
-                    file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
+                    #file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
                     c += 1
         # TODO: Finish implementing based on changes
         # deletions come first as they update the tags
