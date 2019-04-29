@@ -42,9 +42,11 @@ def updateFileWithDeletes(storageDbFile, indicesDeleted):
 """ have been deleted. We write a new row corresponding to each value we """
 """ insert. The format of writing should be similar to the method of first """
 """ writing in the lines in the first place."""
-def updateFileWithInserts(storageDbFile, insertedRows):
+def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
     with open(storageDbFile, 'a+b') as file1:
         for item1 in insertedRows:
+            maximumPosition += 1
+            insertedRows[item1]['position'] = maximumPosition
             toWrite1 = '{' + json.dumps(item1) + ': ' + \
                        json.dumps(insertedRows[item1]) + '}' + '\n'
             # We encode the key-value pair in binary and
@@ -164,16 +166,12 @@ def handleSelects(matches, dynamicDB):
                 for item in dynamicDB:
                     toWrite = json.dumps(item) + '\n'
                     file.write(toWrite)
-            # for item in dynamicDB:
-            #    print(item, ", ")
         elif len(matches) == 4 and (matches[2].lower() == 'from' and
                                     matches[3].lower() == 'values'):
             with open('allValues.txt', 'w') as file:
                 for item in dynamicDB:
                     toWrite = json.dumps(dynamicDB[item]) + '\n'
                     file.write(toWrite)
-            # for item in dynamicDB:
-            #    print(dynamicDB[item], ", ")
         elif len(matches) == 4 and (matches[2].lower() == 'from' and
                                     matches[3].lower() == 'all'):
             with open('allKeysValues.txt', 'w') as file:
@@ -356,6 +354,9 @@ if __name__ == "__main__":
                     in file if line.strip()]
         for row in rows:
             dynamicDB.update(ast.literal_eval(row))
+        lastKey = ast.literal_eval(rows[-1])
+        for key in lastKey.keys():
+            maximumPosition = lastKey[key]['position']
     else:
         isNewDBFile = True
         if os.path.isfile(defaultFile):
@@ -416,6 +417,16 @@ if __name__ == "__main__":
         keyList = list(dynamicDB.keys())
         indicesToDelete = []
         for each in positionsDeleted:
-            indicesToDelete.append(keyList.index(each))
+            # The position is a marker if the item was loaded from the
+            # file. If the item was not loaded from the file
+            # and is being deleted, then we cannot delete it
+            # from the storage file
+            if 'position' in dynamicDB[each]:
+                indicesToDelete.append(keyList.index(each))
+            else:
+                # Otherwise, we were originally going to insert
+                # this value, so we want to make sure that this
+                # is not written to the file.
+                del insertedRows[each]
         updateFileWithDeletes(storageDBFile, indicesToDelete)
-        updateFileWithInserts(storageDBFile, insertedRows)
+        updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
