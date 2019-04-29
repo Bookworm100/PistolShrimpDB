@@ -164,25 +164,29 @@ def handleSelects(matches, dynamicDB):
             # This is the SELECT * FROM all keys
             with open('allKeys.txt', 'w') as file:
                 for item in dynamicDB:
-                    toWrite = json.dumps(item) + '\n'
-                    file.write(toWrite)
+                    if dynamicDB[item]['isFree'] == 'false':
+                        toWrite = json.dumps(item) + '\n'
+                        file.write(toWrite)
         elif len(matches) == 4 and (matches[2].lower() == 'from' and
                                     matches[3].lower() == 'values'):
             with open('allValues.txt', 'w') as file:
                 for item in dynamicDB:
-                    toWrite = json.dumps(dynamicDB[item]['data']) + '\n'
-                    file.write(toWrite)
+                    if dynamicDB[item]['isFree'] == 'false':
+                        toWrite = json.dumps(dynamicDB[item]['data']) + '\n'
+                        file.write(toWrite)
         elif len(matches) == 4 and (matches[2].lower() == 'from' and
                                     matches[3].lower() == 'all'):
             with open('allKeysValues.txt', 'w') as file:
                 for item in dynamicDB:
-                    toWrite = '{' + json.dumps(item) + ': ' + \
+                    if dynamicDB[item]['isFree'] == 'false':
+                        toWrite = '{' + json.dumps(item) + ': ' + \
                               json.dumps(dynamicDB[item]['data']) + '}' + '\n'
-                    file.write(toWrite)
+                        file.write(toWrite)
     elif (len(matches) == 2) or (len(matches) == 4 and
                                  matches[2].lower() == 'from' and
                                  matches[3].lower() == 'all'):
-        if matches[1].lower() in dynamicDB:
+        if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()]\
+                    ['isFree'] == 'false':
             print(dynamicDB[matches[1].lower()]['data'], '\n')
         else:
             print("The key is not in the store!")
@@ -203,7 +207,8 @@ def handleDeletes(matches, dynamicDB):
         matches = matches[2:]
     # This is if just a key was specified.
     elif len(matches) == 2:
-        if matches[1].lower() in dynamicDB:
+        if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()]\
+                    ['isFree'] == 'false':
             key = matches[1].lower()
             matches = [matches[1]]
         else:
@@ -236,7 +241,7 @@ def handleInserts(matches, dynamicDB):
             and len(matches) >= 5:
         # check if key already exists in the key value store
         key = matches[1].lower()
-        if key in dynamicDB:
+        if key in dynamicDB and dynamicDB[key]['isFree'] == 'false':
             print("Key already in key value store. Selecting new random "
                   "key instead...\n")
             while key in dynamicDB:
@@ -385,7 +390,10 @@ if __name__ == "__main__":
             if len(newRows[1]) > 0:
                 for item in newRows[1]:
                     dynamicDB[item]['isFree'] = 'true'
-                    positionsDeleted.append(item)
+                    if 'position' in dynamicDB[item]:
+                        positionsDeleted.append(item)
+                    else:
+                        del insertedRows[item]
                     print("Successfully deleted ", item, ": ",
                           dynamicDB[item]['data'], "\n")
             # If items were inserted, then we add them to our local
