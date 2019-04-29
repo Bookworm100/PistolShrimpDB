@@ -115,6 +115,8 @@ def handleSelects(matches, dynamicDB):
                                  matches[3].lower() == 'all'):
         if matches[1].lower() in dynamicDB:
             print(dynamicDB[matches[1].lower()], '\n')
+        else:
+            print("The key is not in the store!")
     else:
         print("This part is not implemented yet!\n")
 
