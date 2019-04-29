@@ -16,6 +16,36 @@ typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
             'countyName', 'year', 'measurement', 'units', 'unitSymbol'}
 
 
+""" updateFileWithUpdates modifies the  """
+""" value store from the storage file. As Python 3.7 preserves order """
+""" in dictionaries, it's possible to recall the positions of keys (in the """
+""" storage file) to be updated by """
+""" using simple Python function calls (handled in the main function). """
+""" The list of these indices is the argument. As the key did not change, """
+""" the positions that changed are passed in as a list with its associated """
+""" key and row and then using read lines, we modifiy only the lines """
+""" we want and then write them back to the file. """
+def updateFileWithUpdates(storageDbFile, updatedRows):
+    # We read each line currently in the storage file
+    # as a separate element in a list.
+    with open(storageDbFile, 'r+b') as open_file:
+        lineList = open_file.readlines()
+    # We only modify the lines in the list which
+    # had their values modified.
+    for tup in updatedRows:
+        toWrite1 = '{' + json.dumps(tup[1]) + ': ' + \
+                   json.dumps(tup[2]) + '}' + '\n'
+        # We encode the key-value pair in binary and
+        # write to file.
+        toByte1 = toWrite1.encode('utf-8')
+        toWrite2 = ('\0' * (blockSize - sys.getsizeof(toByte1)))
+        toByte2 = toWrite2.encode('utf-8')
+        lineList[tup[0]] = toByte2 + toByte1
+    # We write the modified lines back to the file.
+    with open(storageDbFile, 'w+b') as open_file:
+        open_file.writelines(lineList)
+
+
 """ updateFileWithDeletes removes items marked for deletion in the key """
 """ value store from the storage file. As Python 3.7 preserves order """
 """ in dictionaries, it's possible to recall the positions of keys (in the """
@@ -127,10 +157,53 @@ def generateRandomKey():
     key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
-""" This isn't quite completed just yet, but this should handle anything """
-""" with updates. """
+""" handle updates handles anything in the form UPDATE [key] WTIH VALUES """
+""" (col=tag, col2=tag2, etc). Any other format causes the file to abandon """
+""" the modification. Through each (col=tag, col2=tag2, etc), we change """
+""" tag type's value to be the new value the user passed in. This set of """
+""" changed values is then set to be the data with the value associated """
+""" with the key. Other irregularities causing abandonment of modification """
+""" include the type not being in the set of accepted types, and having """
+""" tags/values without the other. """
 def handleUpdates(matches, dynamicDB):
-    print("Not yet implemented!")
+    if matches[2].lower() == 'with' and matches[3].lower() == 'values' \
+            and len(matches) >= 5:
+        # check if key already exists in the key value store
+        key = matches[1].lower()
+        if key in dynamicDB and dynamicDB[key]['isFree'] == 'false':
+            allVals = dynamicDB[key]['data']
+            matches = matches[4:]
+            # Check that all tags/columns are matched correctly
+            if len(matches) % 2 == 1:
+               print("Tags must be associated with column values!"
+                     " \n Usage:\n UPDATE "
+                     "[key] WITH "
+                     "VALUES (col=tag, col2=tag2...)")
+            # Check that either the column we want to modify
+            # is in the row or is in the set. Otherwise,
+            # this is an invalid input.
+            for colIndex in range(0, len(matches), 2):
+               if matches[colIndex] in allVals or\
+                    matches[colIndex] in typesSet:
+                   allVals[matches[colIndex]] = matches[colIndex + 1]
+               else:
+                   print(matches[colIndex], " is an invalid tag type!\n "
+                                            "Usage:\n UPDATE [key] WITH "
+                         "VALUES (col=tag, col2=tag2...) \n  And tags must be "
+                         "one of measureId, measureDesc, stateId, stateName, "
+                         "countyId,"
+                         "countyName, year, measurement, units, unitSymbol")
+                   return {}
+            # Now set the data of the row to be the modified values.
+            dynamicDB[key]['data'] = allVals
+            return {key: {'isFree': 'false', 'data': allVals}}
+        else:
+            print("The key is not in the store!")
+    else:
+        print("UPDATE format is incorrect. Usage:\n UPDATE [key] WITH "
+              "VALUES (col=tag, col2=tag2...)")
+        return {}
+
 
 """ This isn't quite completed just yet, but this should handle anything """
 """ with searches. """
@@ -276,19 +349,17 @@ def handleInput(command, dynamicDB):
     # check the inputs
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(command)
-    key = ''
-    values = {}
     if matches[0].lower() == 'insert':
-        return handleInserts(matches, dynamicDB), []
+        return handleInserts(matches, dynamicDB), [], {}
     elif matches[0].lower() == 'delete':
-        return {}, handleDeletes(matches, dynamicDB)
+        return {}, handleDeletes(matches, dynamicDB), {}
     elif matches[0].lower() == 'select':
         handleSelects(matches, dynamicDB)
     elif matches[0].lower() == 'search':
         handleSearches(matches, dynamicDB)
     elif matches[0].lower() == 'update':
-        handleUpdates(matches, dynamicDB)
-    return {}, []
+        return {}, [], handleUpdates(matches, dynamicDB)
+    return {}, [], []
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
 """ file. Currently, the JSON file is from                             """
@@ -349,6 +420,7 @@ if __name__ == "__main__":
     isNewDBFile = False
     insertedRows = {}
     positionsDeleted = []
+    updatedRows = {}
     maximumPosition = 0
     # Load existing key value file, into a dictionary,
     # or create a new dictionary loaded to the file
@@ -387,13 +459,37 @@ if __name__ == "__main__":
         # If items were deleted, then we mark their corresponding rows as
         # invalid data.
         if newRows is not None and len(newRows) > 0:
+            # This is for the updated values, so we can store
+            # in a way it makes updating easier.
+            if len(newRows[2]) > 0:
+                for key in newRows[2]:
+                    # If this is a new row (inserted after loading the storage
+                    # file), then we simply change the inserted value.
+                    if key in insertedRows:
+                        insertedRows[key] = newRows[2][key]
+                    else:
+                        updatedRows.update(newRows[2])
+                    print("Successfully updated ", key, ": ",
+                          dynamicDB[key]['data'], "\n")
+            # This is for the deleted values, so we can store
+            # in a way it makes updating easier.
             if len(newRows[1]) > 0:
                 for item in newRows[1]:
                     dynamicDB[item]['isFree'] = 'true'
+                    # This is in the storage file, so
+                    # we should erase them.
                     if 'position' in dynamicDB[item]:
                         positionsDeleted.append(item)
                     else:
+                        # This was a new row, so we do not
+                        # want to write this to the file.
                         del insertedRows[item]
+                    # If there were rows updated, we
+                    # want to make sure these aren't
+                    # written to the file because they
+                    # were deleted.
+                    if item in updatedRows:
+                        del updatedRows[item]
                     print("Successfully deleted ", item, ": ",
                           dynamicDB[item]['data'], "\n")
             # If items were inserted, then we add them to our local
@@ -427,6 +523,7 @@ if __name__ == "__main__":
         # need to use something like orderedDict
         keyList = list(dynamicDB.keys())
         indicesToDelete = []
+        updateInfo = []
         for each in positionsDeleted:
             # The position is a marker if the item was loaded from the
             # file. If the item was not loaded from the file
@@ -439,6 +536,10 @@ if __name__ == "__main__":
                 # this value, so we want to make sure that this
                 # is not written to the file.
                 del insertedRows[each]
+        # We need the index for each row so we know which lines to modify.
+        for each in updatedRows:
+            updateInfo.append((keyList.index(each), each, dynamicDB[each]))
+        updateFileWithUpdates(storageDBFile, updateInfo)
         updateFileWithDeletes(storageDBFile, indicesToDelete)
         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
     print("Goodbye! Hope to see you again soon!")
