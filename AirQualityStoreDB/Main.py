@@ -15,26 +15,76 @@ blockSize = 1000
 typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
             'countyName', 'year', 'measurement', 'units', 'unitSymbol'}
 
-""" For now, we are just appending to the end of the file. Once delete """
-""" is fully implemented, the data will be changed to read/write where tags """
-""" are 0, and then appending afterwards. (Positions where deletions """
-""" happened will need to be recorded). """
+
+""" updateFileWithDeletes removes items marked for deletion in the key """
+""" value store from the storage file. As Python 3.7 preserves order """
+""" in dictionaries, it's possible to recall the positions of keys (in the """
+""" storage file) to be deleted by """
+""" using simple Python function calls (handled in the main function). """
+""" The list of these indices is the argument."""
+def updateFileWithDeletes(storageDbFile, indicesDeleted):
+    # We read each line currently in the storage file
+    # as a separate element in a list.
+    with open(storageDbFile, 'r+b') as open_file:
+        lineList = open_file.readlines()
+    # We sort the indices in reverse, and remove
+    # the value (and line) corresponding to each index in the
+    # storage file.
+    for index in sorted(indicesDeleted, reverse=True):
+        del lineList[index]
+    # We write the modified lines back to the file.
+    with open(storageDbFile, 'w+b') as open_file:
+        open_file.writelines(lineList)
+
+
+""" In updateFileWithInserts, """
+""" We are appending to the end of the file, as all rows to be deleted """
+""" have been deleted. We write a new row corresponding to each value we """
+""" insert. The format of writing should be similar to the method of first """
+""" writing in the lines in the first place."""
 def updateFileWithInserts(storageDbFile, insertedRows):
-    # TODO: Change insert to depend on the output from delete
     with open(storageDbFile, 'a+b') as file1:
         for item1 in insertedRows:
             toWrite1 = '{' + json.dumps(item1) + ': ' + \
                        json.dumps(insertedRows[item1]) + '}' + '\n'
+            # We encode the key-value pair in binary and
+            # write to file.
             toByte1 = toWrite1.encode('utf-8')
             file1.write(('\0'*(blockSize-sys.getsizeof(toByte1)))
                         .encode('utf-8'))
             file1.write(toByte1)
 
+
 """ performTempDeletion removes the values or values assicated with the key """
 """ from the dictionary holding the database, and keep track of what might """
 """ be removed from the storage file upon exiting or quitting. """
-def performTempDeletion(key, values):
-    return {}
+def performTempDeletion(key, values, dynamicDB):
+    selectedKeys = []
+    # If the key-value to delete is simply
+    # identifiable by a key, we simply
+    # mark that key for deletion.
+    if len(values) == 1:
+        selectedKeys.append(key)
+    else:
+        # Since identification was only specified by
+        # rows, we need to filter the rows by each column specified
+        # and mark these keys for deletion.
+        filterItems = dynamicDB
+        for colIndex in range(0, len(values), 2):
+            col = values[colIndex]
+            val = values[colIndex + 1]
+            selected = {}
+            for item1 in filterItems:
+                if col in filterItems[item1]['data']:
+                    if filterItems[item1]['data'][col] == val:
+                        newVal = {}
+                        newVal[item1]=filterItems[item1]
+                        selected.update(newVal)
+            filterItems = selected
+        for item in filterItems:
+            selectedKeys.append(item)
+    return selectedKeys
+
 
 """ generateNewRows will insert the new values to the dictionary key value """
 """ store, and keep track of what should get added to the storage file """
@@ -63,6 +113,7 @@ def generateNewRows(colValList):
             return {}
     return newValues
 
+
 """ generateRandomKey generates a random key to be used when inserting new """
 """ values to the dictionary key value store. """
 def generateRandomKey():
@@ -74,12 +125,33 @@ def generateRandomKey():
     key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
+""" This isn't quite completed just yet, but this should handle anything """
+""" with updates. """
 def handleUpdates(matches, dynamicDB):
     print("Not yet implemented!")
 
+""" This isn't quite completed just yet, but this should handle anything """
+""" with searches. """
 def handleSearches(matches, dynamicDB):
     print("Not yet implemented!")
 
+""" This isn't quite completed just yet, but this should handle anything """
+""" with selects. """
+""" So far, The trivial selects are 1. SELECT * or SELECT * FROM KEYS, """
+""" which writes keys to a file. All this involves is looping through """
+""" the key value store dictionary in the running program and printing """
+""" every key to a text file (printing directly to terminal might be a """
+""" little problematic as there is a lot of data). """
+""" 2. SELECT * FROM VALUES, which prints just all values to a text file. """
+""" This involves looping through the key-value store stored in the """
+""" dictionary and writing all values to a text file. """
+""" 3. SELECT * FROM ALL which prints all values to a text file. This """
+""" involves looping through the key-value dictionary and printing all """
+""" the keys and all their corresponding values."""
+""" 4. SELECT [key] or SELECT [key] FROM ALL involves """
+""" printing the value corresponding to a given key to the console. All """
+""" this involves is first inquring if the key is in the dictionary, and """
+""" then if it is, then printing out its corresponding value."""
 def handleSelects(matches, dynamicDB):
     # return nothing
     # TODO: Finish implementing with more complicated selects.
@@ -88,7 +160,6 @@ def handleSelects(matches, dynamicDB):
                                  matches[2].lower() == 'from' and
                                  matches[3].lower() == 'keys'):
             # This is the SELECT * FROM all keys
-            # TODO: might write to file instead
             with open('allKeys.txt', 'w') as file:
                 for item in dynamicDB:
                     toWrite = json.dumps(item) + '\n'
@@ -120,13 +191,23 @@ def handleSelects(matches, dynamicDB):
     else:
         print("This part is not implemented yet!\n")
 
+
+""" handleDeletes passes either a key or a set of values to the function """
+""" marking keys for deletion. The matches generated using regex are used """
+""" for this purpose. If a key is not in the store, then a message """
+""" explaining this is printed out. If the format is incorrect (not """
+""" as DELETE [key], or DELETE VALUES (col=tag, col2=tag2, col3=tag3….) """
+""" a usage is printed out, and the current operation is abandoned. """
 def handleDeletes(matches, dynamicDB):
+    key = ''
+    # This is if the input is in the form DELETE VALUES (col=tag, col2=tag2...)
     if matches[1].lower() == 'values' and len(matches) >= 3:
         matches = matches[2:]
+    # This is if just a key was specified.
     elif len(matches) == 2:
         if matches[1].lower() in dynamicDB:
             key = matches[1].lower()
-            matches = matches[1]
+            matches = [matches[1]]
         else:
             print("The key is not in the store!")
             return {}
@@ -135,12 +216,24 @@ def handleDeletes(matches, dynamicDB):
               " \n DELETE VALUES (col=tag,"
               " col2=tag2, col3=tag3...)")
         return {}
-    performTempDeletion(key, matches)
-    return {}
+    selectedKeys = performTempDeletion(key, matches, dynamicDB)
+    if len(selectedKeys) > 0:
+        return selectedKeys
+    return []
 
+
+""" handleInserts passes a set of matches generated using regex. """
+""" If a key is in the store, then a message """
+""" explaining this is printed out and a random key is generated instead."""
+""" If the format is incorrect (not """
+""" as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….), """
+""" INSERT VALUES (col=tag, col2=tag2, col3=tag3…), """
+""" a usage is printed out, and the current operation is abandoned. """
 def handleInserts(matches, dynamicDB):
     key = ''
     values = {}
+    # This is if the user inputs in the format
+    # INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….)
     if matches[2].lower() == 'with' and matches[3].lower() == 'values' \
             and len(matches) >= 5:
         # check if key already exists in the key value store
@@ -151,7 +244,11 @@ def handleInserts(matches, dynamicDB):
             while key in dynamicDB:
                 key = generateRandomKey()
         matches = matches[4:]
+        # This function parses the matches and generates new rows in the
+        # proper format.
         values = generateNewRows(matches)
+    # This is if the user inputs in the format
+    # INSERT VALUES (col=tag, col2=tag2, col3=tag3…)
     elif matches[1].lower() == 'values' and len(matches) >= 3:
         matches = matches[2:]
         while key in dynamicDB or key == '':
@@ -173,25 +270,22 @@ def handleInserts(matches, dynamicDB):
 """ and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
 """ while also returning nothing."""
 def handleInput(command, dynamicDB):
-    # TODO: Chop up this function to helper functions. It's getting long.
     # check the inputs
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(command)
     key = ''
     values = {}
     if matches[0].lower() == 'insert':
-        return handleInserts(matches, dynamicDB)
+        return handleInserts(matches, dynamicDB), []
     elif matches[0].lower() == 'delete':
-        return handleDeletes(matches, dynamicDB)
+        return {}, handleDeletes(matches, dynamicDB)
     elif matches[0].lower() == 'select':
         handleSelects(matches, dynamicDB)
     elif matches[0].lower() == 'search':
         handleSearches(matches, dynamicDB)
     elif matches[0].lower() == 'update':
         handleUpdates(matches, dynamicDB)
-
-    # TODO: output may need to include deleted rows too and/or their positions
-    return {}
+    return {}, []
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
 """ file. Currently, the JSON file is from                             """
@@ -214,7 +308,7 @@ def setUpDatabase(filename):
     # Set up the key value store dictionary, which is
     # written to the file at a later point.
     measurementStore = {}
-    positionCounter = 1
+    positionCounter = 0
     for measurement in airMeasurements['data']:
         # Free or not? 0 indicates not free, 1 indicates free
         items = dict(isFree='false', position=positionCounter)
@@ -248,10 +342,11 @@ if __name__ == "__main__":
     print("Loading...\n")
     dynamicDB = {}
     defaultFile = 'AirQualityMeasures.json'
-    # Change this before committing
     storageDBFile = 'AirQualityDBStore.bin'
     isNewDBFile = False
     insertedRows = {}
+    positionsDeleted = []
+    maximumPosition = 0
     # Load existing key value file, into a dictionary,
     # or create a new dictionary loaded to the file
     # later.
@@ -283,9 +378,18 @@ if __name__ == "__main__":
                 toSave = False
             break
         newRows = handleInput(n, dynamicDB)
-        dynamicDB.update(newRows)
-        insertedRows.update(newRows)
-        if newRows != {}:
+        # If items were deleted, then we mark their corresponding rows as
+        # invalid data.
+        if len(newRows[1]) > 0:
+            for item in newRows[1]:
+                dynamicDB[item]['isFree'] = 'true'
+                positionsDeleted.append(item)
+        # If items were inserted, then we add them to our local
+        # key value store and update the list with
+        # the rows to insert.
+        if len(newRows[0]) > 0:
+            dynamicDB.update(newRows[0])
+            insertedRows.update(newRows[0])
             print("Successfully inserted ",newRows, "\n")
 
     # Once the key value store is to be closed, we save any changes.
@@ -304,6 +408,14 @@ if __name__ == "__main__":
                     file.write(toByte)
                     #file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
                     c += 1
-        # TODO: Finish implementing based on changes
-        # deletions come first as they update the tags
+        # TODO: Is it ok if the deletion depends on the implementation
+        # of Python 3.7?
+        # TODO: What if the deletion is for something not in the file?
+        # note: This only works in Python 3.7+. Otherwise, we would
+        # need to use something like orderedDict
+        keyList = list(dynamicDB.keys())
+        indicesToDelete = []
+        for each in positionsDeleted:
+            indicesToDelete.append(keyList.index(each))
+        updateFileWithDeletes(storageDBFile, indicesToDelete)
         updateFileWithInserts(storageDBFile, insertedRows)
