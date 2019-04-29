@@ -170,20 +170,20 @@ def handleSelects(matches, dynamicDB):
                                     matches[3].lower() == 'values'):
             with open('allValues.txt', 'w') as file:
                 for item in dynamicDB:
-                    toWrite = json.dumps(dynamicDB[item]) + '\n'
+                    toWrite = json.dumps(dynamicDB[item]['data']) + '\n'
                     file.write(toWrite)
         elif len(matches) == 4 and (matches[2].lower() == 'from' and
                                     matches[3].lower() == 'all'):
             with open('allKeysValues.txt', 'w') as file:
                 for item in dynamicDB:
                     toWrite = '{' + json.dumps(item) + ': ' + \
-                              json.dumps(dynamicDB[item]) + '}' + '\n'
+                              json.dumps(dynamicDB[item]['data']) + '}' + '\n'
                     file.write(toWrite)
     elif (len(matches) == 2) or (len(matches) == 4 and
                                  matches[2].lower() == 'from' and
                                  matches[3].lower() == 'all'):
         if matches[1].lower() in dynamicDB:
-            print(dynamicDB[matches[1].lower()], '\n')
+            print(dynamicDB[matches[1].lower()]['data'], '\n')
         else:
             print("The key is not in the store!")
     else:
@@ -381,18 +381,22 @@ if __name__ == "__main__":
         newRows = handleInput(n, dynamicDB)
         # If items were deleted, then we mark their corresponding rows as
         # invalid data.
-        if len(newRows[1]) > 0:
-            for item in newRows[1]:
-                dynamicDB[item]['isFree'] = 'true'
-                positionsDeleted.append(item)
-        # If items were inserted, then we add them to our local
-        # key value store and update the list with
-        # the rows to insert.
-        if len(newRows[0]) > 0:
-            dynamicDB.update(newRows[0])
-            insertedRows.update(newRows[0])
-            print("Successfully inserted ",newRows, "\n")
-
+        if newRows is not None and len(newRows) > 0:
+            if len(newRows[1]) > 0:
+                for item in newRows[1]:
+                    dynamicDB[item]['isFree'] = 'true'
+                    positionsDeleted.append(item)
+                    print("Successfully deleted ", item, ": ",
+                          dynamicDB[item]['data'], "\n")
+            # If items were inserted, then we add them to our local
+            # key value store and update the list with
+            # the rows to insert.
+            if len(newRows[0]) > 0:
+                dynamicDB.update(newRows[0])
+                insertedRows.update(newRows[0])
+                for key in newRows[0]:
+                    print("Successfully inserted ", key, ": ",
+                          newRows[0][key]['data'], "\n")
     # Once the key value store is to be closed, we save any changes.
     # If the key value store file didn't exist yet, then
     # a new one is created here.
@@ -411,7 +415,6 @@ if __name__ == "__main__":
                     c += 1
         # TODO: Is it ok if the deletion depends on the implementation
         # of Python 3.7?
-        # TODO: What if the deletion is for something not in the file?
         # note: This only works in Python 3.7+. Otherwise, we would
         # need to use something like orderedDict
         keyList = list(dynamicDB.keys())
@@ -430,3 +433,4 @@ if __name__ == "__main__":
                 del insertedRows[each]
         updateFileWithDeletes(storageDBFile, indicesToDelete)
         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+    print("Goodbye! Hope to see you again soon!")
