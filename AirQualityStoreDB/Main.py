@@ -111,7 +111,8 @@ def performTempDeletion(key, values, dynamicDB):
             val = values[colIndex + 1]
             selected = {}
             for item1 in filterItems:
-                if col in filterItems[item1]['data']:
+                if col in filterItems[item1]['data'] \
+                        and filterItems[item1]['isFree'] == 'false':
                     if filterItems[item1]['data'][col] == val:
                         newVal = {}
                         newVal[item1]=filterItems[item1]
