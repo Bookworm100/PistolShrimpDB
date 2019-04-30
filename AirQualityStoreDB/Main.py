@@ -102,6 +102,10 @@ def performTempDeletion(key, values, dynamicDB):
         # rows, we need to filter the rows by each column specified
         # and mark these keys for deletion.
         filterItems = dynamicDB
+        # Check that all tags/columns are matched correctly
+        if len(values) % 2 == 1:
+            print("Tags must be associated with column values!")
+            return []
         for colIndex in range(0, len(values), 2):
             col = values[colIndex]
             val = values[colIndex + 1]
@@ -113,6 +117,13 @@ def performTempDeletion(key, values, dynamicDB):
                         newVal[item1]=filterItems[item1]
                         selected.update(newVal)
             filterItems = selected
+        if len(filterItems) == 0:
+            print("Sorry, nothing in the store matches! Check your input or "
+                  "tags. As a friendly reminder, the accepted columns are "
+                  "measureId, measureDesc, stateId, stateName, "
+                  "countyId,"
+                  "countyName, year, measurement, units, unitSymbol")
+            return []
         for item in filterItems:
             selectedKeys.append(item)
     return selectedKeys
@@ -210,8 +221,8 @@ def handleUpdates(matches, dynamicDB):
 def handleSearches(matches, dynamicDB):
     print("Not yet implemented!")
 
-""" This isn't quite completed just yet, but this should handle anything """
-""" with selects. """
+""" This should handle anything """
+""" with selects. Either completed or very, very close to completion. """
 """ So far, The trivial selects are 1. SELECT * or SELECT * FROM KEYS, """
 """ which writes keys to a file. All this involves is looping through """
 """ the key value store dictionary in the running program and printing """
@@ -227,9 +238,10 @@ def handleSearches(matches, dynamicDB):
 """ printing the value corresponding to a given key to the console. All """
 """ this involves is first inquring if the key is in the dictionary, and """
 """ then if it is, then printing out its corresponding value."""
+""" 5. SELECT WHERE col=tag, col2=tag2, etc """
 def handleSelects(matches, dynamicDB):
     # return nothing
-    # TODO: Finish implementing with more complicated selects.
+    # TODO: Are we done here?
     if matches[1] == '*':
         if len(matches) == 2 or (len(matches) == 4 and
                                  matches[2].lower() == 'from' and
@@ -263,8 +275,13 @@ def handleSelects(matches, dynamicDB):
             print(dynamicDB[matches[1].lower()]['data'], '\n')
         else:
             print("The key is not in the store!")
+    elif matches[1].lower() == 'where' and len(matches) >= 4:
+        matches = matches[2:]
+        listOfKeys = performTempDeletion('', matches, dynamicDB)
+        for each in listOfKeys:
+            print(each, ": ", dynamicDB[each]['data'], '\n')
     else:
-        print("This part is not implemented yet!\n")
+        print("Either your format is invalid or something is not quite implemented! \n")
 
 
 """ handleDeletes passes either a key or a set of values to the function """
