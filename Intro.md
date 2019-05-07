@@ -1,5 +1,5 @@
 
-## About Me and this project
+# About Me and this project
 
 Hi! I'm Vibha Vijayakumar, currently a junior at Caltech majoring in Computer Science. 
 

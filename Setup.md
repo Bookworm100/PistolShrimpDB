@@ -1,5 +1,7 @@
-## Setting up
+# Setting up
+
 (Note: this only works properly on Python 3.7+)
+
 This will tell you how to set up the key value store! Yay!
 
 1. Retrieve the files (namely Main.py from this repository).
