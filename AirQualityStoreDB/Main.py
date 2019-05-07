@@ -26,27 +26,22 @@ typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
 """ key and row and then using read lines, we modifiy only the lines """
 """ we want and then write them back to the file. """
 def updateFileWithUpdates(storageDbFile, updatedRows):
-    # TODO: Change this to only read applicable lines,
     # We can write back
     # We read each line currently in the storage file
     # as a separate element in a list.
-    with open(storageDbFile, 'r+b') as open_file:
-        lineList = open_file.readlines()
-    # We only modify the lines in the list which
-    # had their values modified.
-    for tup in updatedRows:
-        #file.seek(c * blockSize + blockSize - sys.getsizeof(toByte))
-        toWrite1 = '{' + json.dumps(tup[1]) + ': ' + \
-                   json.dumps(tup[2]) + '}' + '\n'
-        # We encode the key-value pair in binary and
-        # write to file.
-        toByte1 = toWrite1.encode('utf-8')
-        toWrite2 = ('\0' * (blockSize - sys.getsizeof(toByte1)))
-        toByte2 = toWrite2.encode('utf-8')
-        lineList[tup[0]] = toByte2 + toByte1
-    # We write the modified lines back to the file.
-    with open(storageDbFile, 'w+b') as open_file:
-        open_file.writelines(lineList)
+    with open(storageDbFile, 'rb+') as open_file:
+        for tup in updatedRows:
+            toWrite1 = '{' + json.dumps(tup[1]) + ': ' + \
+                       json.dumps(tup[2]) + '}' + '\n'
+            # We encode the key-value pair in binary and
+            # write to file.
+            toByte1 = toWrite1.encode('utf-8')
+            toWrite2 = ('\0' * (blockSize - sys.getsizeof(toByte1)))
+            toByte2 = toWrite2.encode('utf-8')
+            line = toByte2 + toByte1
+            sizeOfLine = len(line)
+            open_file.seek((tup[0]) * sizeOfLine)
+            open_file.write(line)
 
 
 """ updateFileWithDeletes removes items marked for deletion in the key """
@@ -56,20 +51,26 @@ def updateFileWithUpdates(storageDbFile, updatedRows):
 """ using simple Python function calls (handled in the main function). """
 """ The list of these indices is the argument."""
 def updateFileWithDeletes(storageDbFile, indicesDeleted):
-    # TODO: We can read certain lines, so something nice would be to only read
     # lines pushed back
     # We read each line currently in the storage file
     # as a separate element in a list.
+    indList = sorted(indicesDeleted)
+    lenLine = 0
     with open(storageDbFile, 'r+b') as open_file:
+        line = open_file.readline()
+        lenLine = len(line)
+        open_file.seek(indicesDeleted[0] * lenLine)
         lineList = open_file.readlines()
     # We sort the indices in reverse, and remove
     # the value (and line) corresponding to each index in the
     # storage file.
-    for index in sorted(indicesDeleted, reverse=True):
-        del lineList[index]
+    for index in indList:
+        del lineList[indicesDeleted[0] - index]
     # We write the modified lines back to the file.
-    with open(storageDbFile, 'w+b') as open_file:
+    with open(storageDbFile, 'rb+') as open_file:
+        open_file.seek(indicesDeleted[0] * lenLine)
         open_file.writelines(lineList)
+        open_file.truncate()
 
 
 """ In updateFileWithInserts, """
@@ -715,9 +716,12 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
     # We need the index for each row so we know which lines to modify.
     for each in updatedRows:
         updateInfo.append((keyList.index(each), each, dynamicDB[each]))
-    updateFileWithUpdates(storageDBFile, updateInfo)
-    updateFileWithDeletes(storageDBFile, indicesToDelete)
-    updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+    if len(updateInfo) > 0:
+        updateFileWithUpdates(storageDBFile, updateInfo)
+    if len(indicesToDelete) > 0:
+        updateFileWithDeletes(storageDBFile, indicesToDelete)
+    if len(insertedRows) > 0:
+        updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
 
 
 """ The main function checks if a file exists that contains the key value """
