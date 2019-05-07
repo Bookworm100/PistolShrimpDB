@@ -7,20 +7,20 @@ The implementation is a key value store, which is a type of a NoSQL Database.
 
 Check out:
 
--[Intro](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Intro.md)
+- [Intro](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Intro.md)
 
--[Project Plan](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Project%20Plan.md)
+- [Project Plan](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Project%20Plan.md)
 
--[Weekly Updates](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Weekly%20Updates.md)
+- [Weekly Updates](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Weekly%20Updates.md)
 
--[Setting Up](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Setup.md)
+- [Setting Up](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Setup.md)
 
--[Usage](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Usage.md) (Commands you need to run this key value store)
+- [Usage](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Usage.md) (Commands you need to run this key value store)
 
--How does all this work? (Coming soon!)
-
-
+- How does all this work? (Coming soon!)
 
 
 
-# Stay tuned for updates as I make progress!
+
+
+## Stay tuned for updates as I make progress!
