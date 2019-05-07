@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-    </list>
+    <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,8 +63,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="193">
-              <caret line="773" column="68" lean-forward="true" selection-start-line="773" selection-start-column="68" selection-end-line="773" selection-end-column="68" />
+            <state relative-caret-position="4522">
+              <caret line="665" column="61" lean-forward="true" selection-start-line="663" selection-start-column="29" selection-end-line="665" selection-end-column="61" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
                 <marker date="1557205371191" expanded="true" signature="4389:4394" ph="..." />
@@ -208,7 +206,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-6" y="-6" width="1549" height="837" extended-state="6" />
+    <frame x="-6" y="-6" width="1549" height="837" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.08316566" />
@@ -238,8 +236,8 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="193">
-          <caret line="773" column="68" lean-forward="true" selection-start-line="773" selection-start-column="68" selection-end-line="773" selection-end-column="68" />
+        <state relative-caret-position="4522">
+          <caret line="665" column="61" lean-forward="true" selection-start-line="663" selection-start-column="29" selection-end-line="665" selection-end-column="61" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
             <marker date="1557205371191" expanded="true" signature="4389:4394" ph="..." />
