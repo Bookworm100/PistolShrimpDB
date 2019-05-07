@@ -6,12 +6,18 @@ While AirQualityStoreDB now is specified for a specific set of measurements of a
 The implementation is a key value store, which is a type of a NoSQL Database.
 
 Check out:
-Intro
-Project Plan
-Weekly Updates
-Setting Up
-Usage (Commands you need to run this key value store)
-How does all this work? (Coming soon!)
+
+-[Intro](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Intro.md)
+
+-[Project Plan](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Project%20Plan.md)
+
+-[Weekly Updates](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Weekly%20Updates.md)
+
+-[Setting Up](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Setup.md)
+
+-[Usage](https://github.com/Bookworm100/AirQualityStoreDB/blob/master/Usage.md) (Commands you need to run this key value store)
+
+-How does all this work? (Coming soon!)
 
 
 
