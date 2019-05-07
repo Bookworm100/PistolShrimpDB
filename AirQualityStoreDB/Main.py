@@ -239,7 +239,7 @@ def handleUpdates(matches, dynamicDB):
         key = matches[1].lower()
         if key in dynamicDB and dynamicDB[key]['isFree'] == 'false':
             allVals = dynamicDB[key]['data']
-            replaced = allVals
+            replaced = json.dumps(dynamicDB[key]['data'])
             matches = matches[4:]
             # Check that all tags/columns are matched correctly
             if len(matches) % 2 == 1:
@@ -266,7 +266,8 @@ def handleUpdates(matches, dynamicDB):
             # Now set the data of the row to be the modified values.
             dynamicDB[key]['data'] = allVals
             return {key: {'isFree': 'false', 'data': allVals}}, \
-                   {key: {'isFree': 'false', 'data': replaced}}
+                   {key: {'isFree': 'false', 'data':
+                       ast.literal_eval(replaced)}}
         else:
             print("The key is not in the store!")
     else:
@@ -780,7 +781,7 @@ if __name__ == "__main__":
                 for each in positionsDeleted:
                     dynamicDB[each]['isFree'] = 'false'
 
-                for each in updatedRows:
+                for each in replacedRows:
                     dynamicDB[each] = replacedRows[each]
 
             # The applicable changes have been saved to the
@@ -807,7 +808,8 @@ if __name__ == "__main__":
                             insertedRows[key] = newRows[2][0][key]
                         else:
                             updatedRows.update(newRows[2][0])
-                            replacedRows.update(newRows[2][1])
+                            if key not in replacedRows:
+                                replacedRows.update(newRows[2][1])
                         print("Successfully updated ", key, ": ",
                              dynamicDB[key]['data'], "\n")
             # This is for the deleted values, so we can store
