@@ -1,7 +1,7 @@
-# AirQualityStoreDB
+# PistolShrimpDB
 
-Hi! This is AirQualityStoreDB: A Demonstration of a (Mostly) Generalized Format for Storing Big Data!
-While AirQualityStoreDB now is specified for a specific set of measurements of air quality, the hope is to make it general enough to someday insert any kind of data, and retrieve any kind of data.
+Hi! This is PistolShrimpDB: A Demonstration of a (Mostly) Generalized Format for Storing Big Data!
+While PistolShrimpDB now is specified for a specific set of measurements of air quality, the hope is to make it general enough to someday insert any kind of data, and retrieve any kind of data.
 
 The implementation is a key value store, which is a type of a NoSQL Database.
 
