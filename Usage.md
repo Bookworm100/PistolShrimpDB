@@ -37,6 +37,8 @@ If the format does not match as specified, you will be shown the usage of the sp
 	- Selects the row corresponding to the given key. If the key is not in the store, the program will say so!
 - SELECT WHERE (col=val, col2=val2,...)
 	- Selects the row meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
+	- For example: SELECT WHERE measureId=84, stateId=1, countyId=1101, year=1999, measurement=3353220
+	- You can subtract variables to yield more results!
 3. Deletes:
 - DELETE [key]
 	- Deletes the row corresponding to the given key. If the key is not in the store, the program will say so!
@@ -44,6 +46,8 @@ If the format does not match as specified, you will be shown the usage of the sp
 	- Deletes the row meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
 4. Updates: UPDATE [key] VALUES (col=val, col2=val2, col3=val3...) 
 	- Updates the row corresponding to the given key with the new values in the columns. If the key is not in the store, the program will say so!
+	- For example: UPDATE row-tmj3.7qu6.ckbc WITH VALUES (measureId=100, year=2050)
+
 5. Searches:
 - SEARCH VALUES (col=pattern1, col2=pattern2, col3=pattern3...)
 	- Searches the store's values corresponding to each column type for those which are superstrings of the corresponding given pattern
@@ -53,7 +57,6 @@ If the format does not match as specified, you will be shown the usage of the sp
 	- Searches the store's rows (keys and values) for those which contain all the patterns
 - SEARCH KEY (pattern1, pattern2...)
 	- Searches the store's keys corresponding for those which contain all the patterns
-
 
 ## Coming soon! By 6/7/19 hopefully :)
 1. SELECTS:
