@@ -15,9 +15,8 @@ blockSize = 1000
 typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
             'countyName', 'year', 'measurement', 'units', 'unitSymbol'}
 
-
 """ updateFileWithUpdates modifies the  """
-""" value store from the storage file. As Python 3.7 preserves order """
+""" value store from the storage file. As Python 3.6+ preserves order """
 """ in dictionaries, it's possible to recall the positions of keys (in the """
 """ storage file) to be updated by """
 """ using simple Python function calls (handled in the main function). """
@@ -25,6 +24,11 @@ typesSet = {'measureId', 'measureDesc', 'stateId', 'stateName', 'countyId',
 """ the positions that changed are passed in as a list with its associated """
 """ key and row and then using read lines, we modifiy only the lines """
 """ we want and then write them back to the file. """
+""" @param: storageDBFile, the name of the file storing the rows  """
+""" @:param: updatedRows, the list of line information of rows to update. """
+"""          Each tuple includes the line indices and the new information """
+"""          to write, including the key and new information. """
+""" @:return: None """
 def updateFileWithUpdates(storageDbFile, updatedRows):
     # We can write back
     # We read each line currently in the storage file
@@ -45,16 +49,19 @@ def updateFileWithUpdates(storageDbFile, updatedRows):
 
 
 """ updateFileWithDeletes removes items marked for deletion in the key """
-""" value store from the storage file. As Python 3.7 preserves order """
+""" value store from the storage file. As Python 3.6+ preserves order """
 """ in dictionaries, it's possible to recall the positions of keys (in the """
 """ storage file) to be deleted by """
 """ using simple Python function calls (handled in the main function). """
 """ The list of these indices is the argument."""
+""" @param: storageDBFile, the name of the file storing the rows  """
+""" @param: indicesDeleted, the list of line indices to delete. """
+""" @:return: None """
 def updateFileWithDeletes(storageDbFile, indicesDeleted):
     # lines pushed back
     # We read each line currently in the storage file
     # as a separate element in a list.
-    indList = sorted(indicesDeleted)
+    indList = sorted(indicesDeleted, reverse=True)
     lenLine = 0
     with open(storageDbFile, 'r+b') as open_file:
         line = open_file.readline()
@@ -65,7 +72,7 @@ def updateFileWithDeletes(storageDbFile, indicesDeleted):
     # the value (and line) corresponding to each index in the
     # storage file.
     for index in indList:
-        del lineList[indicesDeleted[0] - index]
+        del lineList[index - indicesDeleted[0]]
     # We write the modified lines back to the file.
     with open(storageDbFile, 'rb+') as open_file:
         open_file.seek(indicesDeleted[0] * lenLine)
@@ -78,6 +85,11 @@ def updateFileWithDeletes(storageDbFile, indicesDeleted):
 """ have been deleted. We write a new row corresponding to each value we """
 """ insert. The format of writing should be similar to the method of first """
 """ writing in the lines in the first place."""
+""" @param: storageDBFile, the name of the file storing the rows  """
+""" @param: insertedRows, the list of rows to insert to the file """
+""" @param: maximumPosition, the final position in the file, incremented """
+"""         with each inserted row """
+""" @:return: None """
 def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
     with open(storageDbFile, 'a+b') as file1:
         for item1 in insertedRows:
@@ -96,10 +108,17 @@ def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
 """ printSearchResult filters per pattern. For each pattern specified,"""
 """ each row is examined if the pattern is found in a key (if specified) or """
 """ values (again, if specified). The filtered items are printed. """
+""" @:param: findInKeys, whether to look through the keys """
+""" @:param: findInVals, whether to look through the values """
+""" @:param: cols, the column types to search through """
+""" @:param: patterns, the values to look through """
+""" @:return: toWrite, the string that will be written to the file """
 def printSearchResult(findInKeys, findInVals, cols, patterns):
+    # TODO: Look at using edit distances or other similarity scores
     # Since identification was only specified by
     # rows, we need to filter the rows by each column specified.
     filterItems = dynamicDB
+    toWrite = ""
     for colIndex in range(0, len(patterns)):
         col = ''
         # If there is a column name associated
@@ -133,19 +152,24 @@ def printSearchResult(findInKeys, findInVals, cols, patterns):
         filterItems = selected
     if len(filterItems) == 0:
         print("Sorry, nothing in the store matches! Check your input or "
-              "tags.")
-        return
+              "column types.")
     else:
         # We print each row that we selected.
         for each in filterItems:
-            print(each, ": ", dynamicDB[each]['data'], '\n')
-        print(len(filterItems), " items found.\n")
+            toWrite += each + ": " + json.dumps(dynamicDB[each]['data']) + '\n'
+        toWrite += str(len(filterItems)) + " items found.\n"
+    return toWrite
 
 
-""" performTempDeletion removes the values or values assicated with the key """
+""" findMatchingKeys removes the values or values assicated with the key """
 """ from the dictionary holding the database, and keep track of what might """
 """ be removed from the storage file upon exiting or quitting. """
-def performTempDeletion(key, values, dynamicDB):
+""" @:param: key, an argument which when provided is returned """
+""" @:param: values, the list of values """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: selectedKeys, the list of keys to be displayed or deleted """
+"""           from the store """
+def findMatchingKeys(key, values, dynamicDB):
     selectedKeys = []
     # If the key-value to delete is simply
     # identifiable by a key, we simply
@@ -159,7 +183,7 @@ def performTempDeletion(key, values, dynamicDB):
         filterItems = dynamicDB
         # Check that all tags/columns are matched correctly
         if len(values) % 2 == 1:
-            print("Tags must be associated with column values!")
+            print("Column types must be associated with column values!")
             return []
         for colIndex in range(0, len(values), 2):
             col = values[colIndex]
@@ -175,10 +199,7 @@ def performTempDeletion(key, values, dynamicDB):
             filterItems = selected
         if len(filterItems) == 0:
             print("Sorry, nothing in the store matches! Check your input or "
-                  "tags. As a friendly reminder, the accepted columns are "
-                  "measureId, measureDesc, stateId, stateName, "
-                  "countyId,"
-                  "countyName, year, measurement, units, unitSymbol")
+                  "column types.")
             return []
         for item in filterItems:
             selectedKeys.append(item)
@@ -188,32 +209,30 @@ def performTempDeletion(key, values, dynamicDB):
 """ generateNewRows will insert the new values to the dictionary key value """
 """ store, and keep track of what should get added to the storage file """
 """ upon exiting or quitting. """
+""" @:param: colValList, a list of the parameters for the new row """
+""" @:return: newValues, the inserted row (with a randomly generated key) """
 def generateNewRows(colValList):
     # check that all columns are valid, and build up a dictionary.
     # By looping through every pair, and
     newValues = {}
     if len(colValList) % 2 == 1:
-        print("Tags must be associated with column values! \n Usage:\n INSERT "
+        print("Column types must be associated with column values! "
+              "\n Usage:\n INSERT "
               "[key] WITH "
               "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
                 " col2=tag2, col3=tag3...)")
         return {}
     for i in range(0, len(colValList), 2):
-        if colValList[i] in typesSet:
-            newValues[colValList[i]] = colValList[i+1]
-        else:
-            print("Invalid tag type!\n Usage:\n INSERT [key] WITH "
-                  "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
-                  " col2=tag2, col3=tag3...) \n And tags must be "
-                  "one of measureId, measureDesc, stateId, stateName, "
-                  "countyId,"
-                  "countyName, year, measurement, units, unitSymbol")
-            return {}
+        if colValList[i] not in typesSet:
+            typesSet.add(colValList[i])
+        newValues[colValList[i]] = colValList[i + 1]
     return newValues
 
 
 """ generateRandomKey generates a random key to be used when inserting new """
 """ values to the dictionary key value store. """
+""" @:param: None """
+""" @:return: key, a randomly generated key """
 def generateRandomKey():
     key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
                                      string.digits, k=4))
@@ -223,7 +242,7 @@ def generateRandomKey():
     key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
-""" handle updates handles anything in the form UPDATE [key] WTIH VALUES """
+""" handleUpdates handles anything in the form UPDATE [key] WTIH VALUES """
 """ (col=tag, col2=tag2, etc). Any other format causes the file to abandon """
 """ the modification. Through each (col=tag, col2=tag2, etc), we change """
 """ tag type's value to be the new value the user passed in. This set of """
@@ -231,7 +250,15 @@ def generateRandomKey():
 """ with the key. Other irregularities causing abandonment of modification """
 """ include the type not being in the set of accepted types, and having """
 """ tags/values without the other. """
+""" @:param: matches, a list of strings of words """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: newOldRows, the tuple of a new row to update with, and the row """
+"""           to be replaced """
 def handleUpdates(matches, dynamicDB):
+    # TODO: Change labels - forgot what this means
+    newOldRows = ()
+    error = False
+    usage = "Usage:\n UPDATE [key] WITH  VALUES (col=tag, col2=tag2...) \n"
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     if matches[2].lower() == 'with' and matches[3].lower() == 'values' \
@@ -242,39 +269,36 @@ def handleUpdates(matches, dynamicDB):
             allVals = dynamicDB[key]['data']
             replaced = json.dumps(dynamicDB[key]['data'])
             matches = matches[4:]
-            # Check that all tags/columns are matched correctly
+            # Check that all types/columns are matched correctly
             if len(matches) % 2 == 1:
-               print("Tags must be associated with column values!"
-                     " \n Usage:\n UPDATE "
-                     "[key] WITH "
-                     "VALUES (col=tag, col2=tag2...)")
-               return ()
+               print("Column types must be associated with column values!"
+                     " \n ", usage)
+               error = True
             # Check that either the column we want to modify
             # is in the row or is in the set. Otherwise,
             # this is an invalid input.
-            for colIndex in range(0, len(matches), 2):
-               if matches[colIndex] in allVals or\
-                    matches[colIndex] in typesSet:
-                   allVals[matches[colIndex]] = matches[colIndex + 1]
-               else:
-                   print(matches[colIndex], " is an invalid tag type!\n "
-                                            "Usage:\n UPDATE [key] WITH "
-                         "VALUES (col=tag, col2=tag2...) \n  And tags must be "
-                         "one of measureId, measureDesc, stateId, stateName, "
-                         "countyId,"
-                         "countyName, year, measurement, units, unitSymbol")
-                   return ()
-            # Now set the data of the row to be the modified values.
-            dynamicDB[key]['data'] = allVals
-            return {key: {'isFree': 'false', 'data': allVals}}, \
-                   {key: {'isFree': 'false', 'data':
-                       ast.literal_eval(replaced)}}
+            if not error:
+                for colIndex in range(0, len(matches), 2):
+                    if matches[colIndex] in allVals or\
+                           matches[colIndex] in typesSet:
+                        allVals[matches[colIndex]] = matches[colIndex + 1]
+                    else:
+                        print(matches[colIndex], " is an invalid column type! \n "
+                                            , usage)
+                        error = True
+                # Now set the data of the row to be the modified values.
+                if not error:
+                    dynamicDB[key]['data'] = allVals
+                    newOldRows = {key: {'isFree': 'false', 'data': allVals}}, \
+                        {key: {'isFree': 'false', 'data':
+                            ast.literal_eval(replaced)}}
         else:
             print("The key is not in the store!")
+            error = True
     else:
-        print("UPDATE format is incorrect. Usage:\n UPDATE [key] WITH "
-              "VALUES (col=tag, col2=tag2...)")
-        return ()
+        print("UPDATE format is incorrect. \n", usage)
+        error = True
+    return newOldRows
 
 
 """ There are 4 options for handling searches. These are of the form: """
@@ -291,6 +315,9 @@ def handleUpdates(matches, dynamicDB):
 """ a list of the column tags the user wants to search in """
 """(only non empty in option 1), and a list of """
 """ the patterns to be matched on. """
+""" @:param: matches, a list of strings of words """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: None """
 def handleSearches(matches, dynamicDB):
     # 1. VALUES(col=tag, col2=tag2, col3=tag3….)
     # 2. VALUES(pattern1, pattern2, pattern3)
@@ -298,6 +325,12 @@ def handleSearches(matches, dynamicDB):
     # 4. KEY (pattern1, pattern2,…)
     # Cases 1 and 2
     matches = matches[1:]
+    usage = "Usage: SEARCH [key] (pattern1, pattern2,…) \n \
+            SEARCH VALUES (col1=pattern1, col2=pattern2, col3=pattern3….) \n \
+            SEARCH VALUES (pattern1, pattern2, pattern3) \n \
+            SEARCH KEY AND VALUES (pattern1, pattern2, pattern3) \ "
+    error = False
+    toWrite = ''
     if matches[0].lower() == "values":
         # Collect column names if necessary
         cols = []
@@ -306,50 +339,42 @@ def handleSearches(matches, dynamicDB):
         if len(matches) == 0:
             print("Invalid format!"
                   "You need patterns! As a reminder, "
-                  "the usage is below: \n "
-                  "Usage: SEARCH [key] (pattern1, pattern2,…) \n \
-                   SEARCH VALUES (col1=pattern1, col2=pattern2, col3=pattern3….) \n \
-                   SEARCH VALUES (pattern1, pattern2, pattern3) \n \
-                   SEARCH KEY AND VALUES (pattern1, pattern2, pattern3) \ ")
-            return
+                  "the usage is below: \n ",
+                  usage)
+            error = True
         # If columns are called with patterns, then we separate the matches
         # out to their corresponding lists to be called in printSearchResult.
         if matches[0].find('=') != -1:
             for match in matches:
                 match = match.split('=')
                 if len(match) != 2:
-                    print("Tags must be associated with column values!"
+                    print("Column types must be associated with column values!"
                           " As a reminder, "
-                          "the usage is below: \n "
-                          "Usage: SEARCH [key] (pattern1, pattern2,…) \n \
-                   SEARCH VALUES (col1=pattern1, col2=pattern2, "
-                          "col3=pattern3….) \n \
-                   SEARCH VALUES (pattern1, pattern2, pattern3) \n \
-                   SEARCH KEY AND VALUES (pattern1, pattern2, pattern3) \ ")
-                    return
-                cols.append(match[0])
-                patterns.append(match[1])
+                          "the usage is below: \n ", usage)
+                    error = True
+                    break
+                else:
+                    cols.append(match[0])
+                    patterns.append(match[1])
         else:
             patterns = matches
-        printSearchResult(False, True, cols, patterns)
+        toWrite += printSearchResult(False, True, cols, patterns)
     # Case 3 (we are looking through keys and values, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key" and matches[1].lower() == "and" and\
             matches[2].lower() == "values" or matches[0] == "*":
-        printSearchResult(True, True, [], matches[3:])
+        toWrite += printSearchResult(True, True, [], matches[3:])
     # Case 4 (we are looking through keys, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key":
-        printSearchResult(True, False, [], matches[1:])
+        toWrite += printSearchResult(True, False, [], matches[1:])
     else:
         print("Invalid format! Either your key is not in the store,"
               "or you are following incorrect format. As a reminder, "
-              "the usage is below: \n "
-              "Usage: SEARCH [key] (pattern1, pattern2,…) \n \
-                   SEARCH VALUES (col1=pattern1, col2=pattern2, "
-              "col3=pattern3….) \n \
-                   SEARCH VALUES (pattern1, pattern2, pattern3) \n \
-                   SEARCH KEY AND VALUES (pattern1, pattern2, pattern3) \ ")
+              "the usage is below: \n ", usage)
+        error = True
+    if not error and toWrite != '':
+        printSelectsSearches("searchResult.txt", toWrite)
 
 
 """ This handles the printing of selects to a file or output. """
@@ -366,7 +391,11 @@ def handleSearches(matches, dynamicDB):
 """ file to store the output. This repeats until the user types in N, or """
 """ if they specify a valid file path. In any case the user is prompted to """
 """ type Y or N and they do not, they are prompted again to type Y or N. """
-def printSelects(default_file, toWrite):
+""" @:param: default_file, the file that results will be written to if no """
+"""          file is specified by the user"""
+""" @:param: toWrite, the string that will be written to the file """
+""" @:return: None """
+def printSelectsSearches(default_file, toWrite):
     written = False
     # Does the user want to print output to the terminal?
     n = input("Would you like to print the output to the terminal?"
@@ -393,6 +422,7 @@ def printSelects(default_file, toWrite):
         # The user is prompted to indicate if they want to use a custom file.
         n = input("Would you like to create a custom file with the output?"
                   " Type Y or N only. \n")
+        # TODO n = n.lower()
         while not written:
             try:
                 new_input = default_file
@@ -437,15 +467,21 @@ def printSelects(default_file, toWrite):
 """ this involves is first inquring if the key is in the dictionary, and """
 """ then if it is, then printing out its corresponding value."""
 """ 5. SELECT WHERE col=tag, col2=tag2, etc. The printing is done in """
-""" printSelects, but the information to be written is determined in this """
+""" printSelectsSearches, but the information to be written is determined in this """
 """ function, as is the default file name to be printed, which is passed to """
-""" printSelects. """
+""" printSelectsSearches. """
+""" @:param: matches, a list of strings of words """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: None """
 def handleSelects(matches, dynamicDB):
-    # return nothing
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     toWrite = ''
     new_input = ''
+    usage = "SELECT * \n SELECT * FROM KEYS \n SELECT * FROM VALUES \n" +\
+            "SELECT * FROM ALL \n SELECT [key] SELECT [key] FROM ALL \n" +\
+            "SELECT WHERE (col=val, col2=val2,...)"
+    error = False
     if matches[1] == '*':
         if len(matches) == 2 or (len(matches) == 4 and
                                  matches[2].lower() == 'from' and
@@ -469,9 +505,7 @@ def handleSelects(matches, dynamicDB):
                     toWrite += '{' + json.dumps(item) + ': ' + \
                               json.dumps(dynamicDB[item]['data']) + '}' + '\n'
         else:
-            print("Either your format is invalid or something is not quite"
-                  " implemented! \n")
-            return
+            error = True
     elif (len(matches) == 2) or (len(matches) == 4 and
                                  matches[2].lower() == 'from' and
                                  matches[3].lower() == 'all'):
@@ -482,17 +516,19 @@ def handleSelects(matches, dynamicDB):
             print("The key is not in the store!")
     elif matches[1].lower() == 'where' and len(matches) >= 4:
         matches = matches[2:]
-        listOfKeys = performTempDeletion('', matches, dynamicDB)
+        listOfKeys = findMatchingKeys('', matches, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
     else:
+        error = True
+    if toWrite != '':
+        printSelectsSearches(new_input, toWrite)
+    if error:
         print("Either your format is invalid or something is "
               "not quite implemented! \n")
-        return
-    if toWrite != '':
-        printSelects(new_input, toWrite)
+        print(usage)
 
 
 """ handleDeletes passes either a key or a set of values to the function """
@@ -501,8 +537,13 @@ def handleSelects(matches, dynamicDB):
 """ explaining this is printed out. If the format is incorrect (not """
 """ as DELETE [key], or DELETE VALUES (col=tag, col2=tag2, col3=tag3….) """
 """ a usage is printed out, and the current operation is abandoned. """
+""" @:param: matches, a list of strings of words """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: selectedKeys, the list of keys that we delete from the store. """
 def handleDeletes(matches, dynamicDB):
     key = ''
+    selectedKeys = []
+    error = False
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     # This is if the input is in the form DELETE VALUES (col=tag, col2=tag2...)
@@ -516,16 +557,15 @@ def handleDeletes(matches, dynamicDB):
             matches = [matches[1]]
         else:
             print("The key is not in the store!")
-            return {}
+            error = True
     else:
         print("Delete format is incorrect. Usage:\n DELETE [key] "
               " \n DELETE VALUES (col=tag,"
               " col2=tag2, col3=tag3...)")
-        return {}
-    selectedKeys = performTempDeletion(key, matches, dynamicDB)
-    if len(selectedKeys) > 0:
-        return selectedKeys
-    return []
+        error = True
+    if error == False:
+        selectedKeys = findMatchingKeys(key, matches, dynamicDB)
+    return selectedKeys
 
 
 """ handleInserts passes a set of matches generated using regex. """
@@ -535,9 +575,13 @@ def handleDeletes(matches, dynamicDB):
 """ as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….), """
 """ INSERT VALUES (col=tag, col2=tag2, col3=tag3…), """
 """ a usage is printed out, and the current operation is abandoned. """
+""" @:param: matches, a list of strings of words """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: row, the row we just inserted """
 def handleInserts(matches, dynamicDB):
     key = ''
     values = {}
+    row = {}
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     # This is if the user inputs in the format
@@ -566,9 +610,10 @@ def handleInserts(matches, dynamicDB):
         print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
               "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
               " col2=tag2, col3=tag3...)")
-        return {}
+        row = {}
     if values != {}:
-        return {key: {'isFree': 'false', 'data': values}}
+        row = {key: {'isFree': 'false', 'data': values}}
+    return row
 
 
 """ handleInput will be used to execute commands to change the key value """
@@ -577,21 +622,32 @@ def handleInserts(matches, dynamicDB):
 """ the new rows, Delete statements will simply change the tag values  """
 """ and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
 """ while also returning nothing."""
+""" @param: command, the raw command passed in by the user """
+""" @param: dynamicDB, the key value store running in the program """
+""" @return: insertedRows, deletedKeys, updateResults: a tuple of """
+"""          a list of inserted rows, a list of keys just deleted, """
+"""          and a tuple of rows that were inserted and their corresponding """
+"""          rows that were replaced. """
 def handleInput(command, dynamicDB):
     # check the inputs
+    # TODO: Change command to lowercase, pass in removed command
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+=]+', re.IGNORECASE)
     matches = parser.findall(command)
+    insertedRows = {}
+    deletedKeys = []
+    updateResults = ()
     if matches[0].lower() == 'insert':
-        return handleInserts(matches, dynamicDB), [], ()
+        insertedRows = handleInserts(matches, dynamicDB)
     elif matches[0].lower() == 'delete':
-        return {}, handleDeletes(matches, dynamicDB), ()
+        deletedKeys = handleDeletes(matches, dynamicDB)
     elif matches[0].lower() == 'select':
         handleSelects(matches, dynamicDB)
     elif matches[0].lower() == 'search':
         handleSearches(matches, dynamicDB)
     elif matches[0].lower() == 'update':
-        return {}, [], handleUpdates(matches, dynamicDB)
-    return {}, [], ()
+        updateResults = handleUpdates(matches, dynamicDB)
+    return insertedRows, deletedKeys, updateResults
+
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
 """ file. Currently, the JSON file is from                             """
@@ -604,6 +660,10 @@ def handleInput(command, dynamicDB):
 """ of measurement, an id associated with a specific state, that state's """
 """ name, an id associated with a county, that county's name, year of """
 """ measurement, and if there are any units, then its name and symbol. """
+""" @param: fileName, the name of the json file to load the initial rows """
+"""         from """
+""" @return: measurementStore, the newly set up key value store, to be """
+"""          dynamicDB (see loadFile)"""
 def setUpDatabase(filename):
     # Open and load the file (the with clause ensures the file closes,
     # even if there is an exception raised).
@@ -646,6 +706,18 @@ def setUpDatabase(filename):
 """ The return values are the key value store, whether the storageDBFile """
 """ exists yet, and the maximum position read from in the case the """
 """ storageDBFile exists. """
+""" @param: defaultFile: if there is no currently existing database file, """
+"""         we want to load from a file with the original json values. """
+""" @param: storageDBFile, the name of the file storing the rows  """
+""" @param: isNewDBFile, a boolean indicating if the file is new """
+""" @param: maximumPosition, the final position in the file, incremented """
+"""         with each inserted row """
+""" @return: dynamicDB, the key value store maintained in the program """
+"""          that is now setup and initialized by the program """
+""" @return: isNewDBFile, a false value indicating that if the file """
+"""          did not exist earlier, it now does """
+""" @return: maximumPosition the final position in the file, incremented """
+"""         with each inserted row """
 def loadFile(defaultFile, storageDBFile, isNewDBFile, maximumPosition):
     dynamicDB = {}
     if os.path.isfile(storageDBFile):
@@ -680,8 +752,15 @@ def loadFile(defaultFile, storageDBFile, isNewDBFile, maximumPosition):
 """ the storage file, and finally, the list of inserted rows is passed to """
 """ the updateFileWithInserts, where the information is written to the """
 """ end of the file. """
+""" @param: isnewDBFile, a boolean indicating if the file is new """
+""" @param: storageDBFile, the name of the file storing the rows """
+""" @param: dynamicDB, the key value store maintained in the program """
+""" @param: deletedKeys, the list of keys deleted from the store """
+""" @param: insertedRows, the list of inserted rows """
+""" @param: updatedRows, the list of updated rows """
+""" @return: None """
 def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
-                positionsDeleted, insertedRows, updatedRows):
+                deletedKeys, insertedRows, updatedRows):
     # Once the key value store is to be closed, we save any changes.
     # If the key value store file didn't exist yet, then
     # a new one is created here.
@@ -696,12 +775,11 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
                                .encode('utf-8'))
                 file.write(toByte)
                 c += 1
-    # note: This only works in Python 3.7+. Otherwise, we would
-    # need to use something like orderedDict
+
     keyList = list(dynamicDB.keys())
     indicesToDelete = []
     updateInfo = []
-    for each in positionsDeleted:
+    for each in deletedKeys:
         # The position is a marker if the item was loaded from the
         # file. If the item was not loaded from the file
         # and is being deleted, then we cannot delete it
@@ -713,9 +791,11 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
             # this value, so we want to make sure that this
             # is not written to the file.
             del insertedRows[each]
+
     # We need the index for each row so we know which lines to modify.
     for each in updatedRows:
         updateInfo.append((keyList.index(each), each, dynamicDB[each]))
+
     if len(updateInfo) > 0:
         updateFileWithUpdates(storageDBFile, updateInfo)
     if len(indicesToDelete) > 0:
@@ -730,7 +810,11 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
 """ a specific JSON file storing air quality measurements. This main """
 """ function will ideally hold handling user input and other operations """
 """ necessary, and when the key value store is closed, any changes are """
-""" written to the file which stores the key value store. """
+""" written to the file which stores the key value store. Note: """
+""" This only works in Python 3.6+. Otherwise, we would """
+""" need to use something like orderedDict. """
+""" @params: none """
+""" @return: none """
 if __name__ == "__main__":
     print("Loading...\n")
     # dynamicDB = {}
@@ -738,10 +822,16 @@ if __name__ == "__main__":
     storageDBFile = 'AirQualityDBStore.bin'
     isNewDBFile = False
     insertedRows = {}
-    positionsDeleted = []
+    deletedKeys = []
     updatedRows = {}
     maximumPosition = 0
     replacedRows = {}
+
+    # This program will only work properly
+    # with Python versions 3.6+, so we check that
+    # the version is infact 3.6+
+    assert sys.version_info >= (3, 6)
+
     # Load existing key value file, into a dictionary,
     # or create a new dictionary loaded to the file
     # later.
@@ -755,10 +845,12 @@ if __name__ == "__main__":
     while True:
         n = input("Welcome to AirQualityStoreDB! Exit with exit or quit if you"
                   " want your changes saved, or with abort if you don't.\n")
+
         if n == "quit" or n == "abort" or n == "exit":
             if n == "abort":
                 toSave = False
             break
+
         # This allows to save or abandon changes to the file without
         # exiting the program.
         if n == "save" or n == "undo":
@@ -769,29 +861,35 @@ if __name__ == "__main__":
             # have been saved.
             if n == "save":
                 saveChanges(isNewDBFile, storageDBFile, dynamicDB,
-                            positionsDeleted, insertedRows, updatedRows)
-                for each in positionsDeleted:
+                            deletedKeys, insertedRows, updatedRows)
+                for each in deletedKeys:
                     del dynamicDB[each]
+                print("Successfully saved ", len(insertedRows), " insertions, "
+                      , len(deletedKeys), " deletions, and ",
+                      len(updatedRows), " updates!", "\n")
             # undo is trickier, as we need to not only get rid of
             # inserted rows and reset deleted values to "not free",
             # but also we need to undo the updates. To do so,
             # we keep track of the values that have been replaced.
             # We rewrite the data to be that of the "replaced" rows.
             else:
-                # TODO: Finish debugging for all cases
                 for each in insertedRows:
                     del dynamicDB[each]
 
-                for each in positionsDeleted:
+                for each in deletedKeys:
                     dynamicDB[each]['isFree'] = 'false'
 
                 for each in replacedRows:
                     dynamicDB[each] = replacedRows[each]
 
+                print("Successfully undoed ", len(insertedRows),
+                      " insertions, ", len(deletedKeys), " deletions, and ",
+                      len(updatedRows), " updates!", "\n")
+
             # The applicable changes have been saved to the
             # storage file, so we no longer need them.
             insertedRows.clear()
-            positionsDeleted.clear()
+            deletedKeys.clear()
             updatedRows.clear()
             replacedRows.clear()
             continue
@@ -816,6 +914,7 @@ if __name__ == "__main__":
                                 replacedRows.update(newRows[2][1])
                         print("Successfully updated ", key, ": ",
                              dynamicDB[key]['data'], "\n")
+
             # This is for the deleted values, so we can store
             # in a way it makes updating easier.
             if newRows[1] is not None and len(newRows[1]) > 0:
@@ -824,7 +923,7 @@ if __name__ == "__main__":
                     # This is in the storage file, so
                     # we should erase them.
                     if 'position' in dynamicDB[item]:
-                        positionsDeleted.append(item)
+                        deletedKeys.append(item)
                     else:
                         # This was a new row, so we do not
                         # want to write this to the file.
@@ -837,6 +936,7 @@ if __name__ == "__main__":
                         del updatedRows[item]
                     print("Successfully deleted ", item, ": ",
                           dynamicDB[item]['data'], "\n")
+
             # If items were inserted, then we add them to our local
             # key value store and update the list with
             # the rows to insert.
@@ -848,5 +948,5 @@ if __name__ == "__main__":
                           newRows[0][key]['data'], "\n")
     if toSave:
         saveChanges(isNewDBFile, storageDBFile, dynamicDB,
-                positionsDeleted, insertedRows, updatedRows)
+                deletedKeys, insertedRows, updatedRows)
     print("Goodbye! Hope to see you again soon!")

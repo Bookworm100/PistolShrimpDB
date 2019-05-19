@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -42,20 +43,22 @@
     <session id="-606955236">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.5" value="1" />
-          <entry key="project.opened" value="2" />
+          <entry key="project.open.time.4" value="3" />
+          <entry key="project.open.time.5" value="2" />
+          <entry key="project.opened" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="184" />
-          <entry key="py" value="21465" />
+          <entry key="py" value="27173" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="21649" />
+          <entry key="Python" value="27357" />
         </counts>
       </usages-collector>
     </session>
@@ -65,20 +68,12 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="130">
-              <caret line="42" column="26" selection-start-line="42" selection-start-column="22" selection-end-line="42" selection-end-column="26" />
+            <state relative-caret-position="255">
+              <caret line="51" column="51" selection-start-line="51" selection-start-column="51" selection-end-line="51" selection-end-column="51" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1557231618574" expanded="true" signature="4305:4310" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="6112:6115" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="10522:13393" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="13432:13433" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="16378:21525" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="18655:20123" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="21584:24500" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="31443:33025" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="33141:33146" ph="..." />
-                <marker date="1557231618574" expanded="true" signature="33141:34980" ph="..." />
+                <marker date="1558306091251" expanded="true" signature="5451:5456" ph="..." />
+                <marker date="1558306091251" expanded="true" signature="7316:7319" ph="..." />
               </folding>
             </state>
           </provider>
@@ -105,6 +100,16 @@
       <find>reache</find>
       <find>handle</find>
       <find>seek</find>
+      <find>and tags</find>
+      <find>3.7</find>
+      <find>3.6</find>
+      <find>positionsDeleted</find>
+      <find>return</find>
+      <find>printSelectsandSearches</find>
+      <find>typesSet</find>
+      <find>searches</find>
+      <find>handleSearches</find>
+      <find>maximumPos</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -117,9 +122,9 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="1">
-    <option name="x" value="1775" />
-    <option name="width" value="1950" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="1905" />
+    <option name="width" value="1948" />
     <option name="height" value="2075" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -198,7 +203,7 @@
     </task>
     <servers />
   </component>
-  <component name="TodoView">
+  <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
       <is-autoscroll-to-source value="true" />
     </todo-panel>
@@ -208,21 +213,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="710" y="0" width="780" height="830" extended-state="0" />
+    <frame x="762" y="0" width="779" height="830" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17174515" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18723994" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3342857" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32956153" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.33521923" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32956153" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32428572" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32956153" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32857144" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32956153" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -238,20 +243,12 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="42" column="26" selection-start-line="42" selection-start-column="22" selection-end-line="42" selection-end-column="26" />
+        <state relative-caret-position="255">
+          <caret line="51" column="51" selection-start-line="51" selection-start-column="51" selection-end-line="51" selection-end-column="51" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
-            <marker date="1557231618574" expanded="true" signature="4305:4310" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="6112:6115" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="10522:13393" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="13432:13433" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="16378:21525" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="18655:20123" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="21584:24500" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="31443:33025" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="33141:33146" ph="..." />
-            <marker date="1557231618574" expanded="true" signature="33141:34980" ph="..." />
+            <marker date="1558306091251" expanded="true" signature="5451:5456" ph="..." />
+            <marker date="1558306091251" expanded="true" signature="7316:7319" ph="..." />
           </folding>
         </state>
       </provider>
