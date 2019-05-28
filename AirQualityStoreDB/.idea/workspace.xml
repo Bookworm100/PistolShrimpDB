@@ -43,22 +43,23 @@
     <session id="-606955236">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="3" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.4" value="3" />
           <entry key="project.open.time.5" value="2" />
-          <entry key="project.opened" value="6" />
+          <entry key="project.open.time.6" value="1" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="184" />
-          <entry key="py" value="27173" />
+          <entry key="py" value="28575" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="27357" />
+          <entry key="Python" value="28759" />
         </counts>
       </usages-collector>
     </session>
@@ -68,12 +69,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="51" column="51" selection-start-line="51" selection-start-column="51" selection-end-line="51" selection-end-column="51" />
+            <state relative-caret-position="748">
+              <caret line="430" column="35" selection-start-line="430" selection-start-column="35" selection-end-line="430" selection-end-column="35" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1558306091251" expanded="true" signature="5451:5456" ph="..." />
-                <marker date="1558306091251" expanded="true" signature="7316:7319" ph="..." />
+                <marker date="1559039087012" expanded="true" signature="5493:5498" ph="..." />
+                <marker date="1559039087012" expanded="true" signature="8923:8926" ph="..." />
+                <marker date="1559039087012" expanded="true" signature="12554:12556" ph="..." />
               </folding>
             </state>
           </provider>
@@ -108,8 +110,12 @@
       <find>printSelectsandSearches</find>
       <find>typesSet</find>
       <find>searches</find>
-      <find>handleSearches</find>
       <find>maximumPos</find>
+      <find>find</find>
+      <find>groupby</find>
+      <find>handleSelects</find>
+      <find>handleDelete</find>
+      <find>handleSearches</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -123,8 +129,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1905" />
-    <option name="width" value="1948" />
+    <option name="x" value="-15" />
+    <option name="width" value="1468" />
     <option name="height" value="2075" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -133,7 +139,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -145,6 +150,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -213,23 +219,23 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="762" y="0" width="779" height="830" extended-state="0" />
+    <frame x="-6" y="0" width="587" height="830" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18723994" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2589792" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32956153" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.33521923" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.33521923" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32428572" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32857144" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.3281471" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32956153" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.33285713" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -243,12 +249,13 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="51" column="51" selection-start-line="51" selection-start-column="51" selection-end-line="51" selection-end-column="51" />
+        <state relative-caret-position="748">
+          <caret line="430" column="35" selection-start-line="430" selection-start-column="35" selection-end-line="430" selection-end-column="35" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
-            <marker date="1558306091251" expanded="true" signature="5451:5456" ph="..." />
-            <marker date="1558306091251" expanded="true" signature="7316:7319" ph="..." />
+            <marker date="1559039087012" expanded="true" signature="5493:5498" ph="..." />
+            <marker date="1559039087012" expanded="true" signature="8923:8926" ph="..." />
+            <marker date="1559039087012" expanded="true" signature="12554:12556" ph="..." />
           </folding>
         </state>
       </provider>

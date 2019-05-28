@@ -7,6 +7,9 @@ import ast
 import re
 import random
 import string
+import difflib
+from itertools import groupby
+from jsonpath_ng import jsonpath, parse
 
 # Note: all global variables will not be modified
 # size of blocks of memory in bytes
@@ -113,8 +116,7 @@ def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
 """ @:param: cols, the column types to search through """
 """ @:param: patterns, the values to look through """
 """ @:return: toWrite, the string that will be written to the file """
-def printSearchResult(findInKeys, findInVals, cols, patterns):
-    # TODO: Look at using edit distances or other similarity scores
+def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limit=0.8):
     # Since identification was only specified by
     # rows, we need to filter the rows by each column specified.
     filterItems = dynamicDB
@@ -133,7 +135,13 @@ def printSearchResult(findInKeys, findInVals, cols, patterns):
         for item1 in filterItems:
             # We examine if a pattern is in a key if necessary.
             if findInKeys:
-                if item1.find(val) != -1:
+                ratioDistance = 0
+                if toFind:
+                    ratioDistance = difflib.SequenceMatcher(None, item1,
+                                                            val).ratio()
+                predicate = (item1.find(val) != -1) or (toFind and
+                                                        ratioDistance > limit)
+                if predicate:
                     newVal = {}
                     newVal[item1] = filterItems[item1]
                     selected.update(newVal)
@@ -144,11 +152,32 @@ def printSearchResult(findInKeys, findInVals, cols, patterns):
             # matches the value at that column.
             if findInVals:
                 for item2 in filterItems[item1]['data']:
-                    if col == '' or item2.find(col) != -1:
-                        if filterItems[item1]['data'][item2].find(val) != -1:
+                    ratioDistance = 0
+                    if toFind and col != '':
+                        ratioDistance = difflib.SequenceMatcher(None, item2,
+                                                                col).ratio()
+                        #ratioDistance = float((editDistance(item2, col))) / \
+                                        #float(len(item2))
+                        #print("computed")
+                    predicate = (item2.find(col) != -1) or (toFind and
+                                                            ratioDistance > limit)
+                    if col == '' or predicate:
+                        item3 = filterItems[item1]['data'][item2]
+                        if toFind:
+                            ratioDistance = difflib.SequenceMatcher(None, item3,
+                                                                    val).ratio()
+                            #ratioDistance = float((editDistance(item3, val))) / \
+                            #                float(len(item3))
+                            #print("computed2")
+                        predicate = (item3.find(val) != -1) or (toFind and
+                                                                ratioDistance > limit)
+                        #print(item3)
+
+                        if predicate:
                             newVal = {}
                             newVal[item1] = filterItems[item1]
                             selected.update(newVal)
+                            #print("updated")
         filterItems = selected
     if len(filterItems) == 0:
         print("Sorry, nothing in the store matches! Check your input or "
@@ -242,6 +271,7 @@ def generateRandomKey():
     key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
     return key
 
+
 """ handleUpdates handles anything in the form UPDATE [key] WTIH VALUES """
 """ (col=tag, col2=tag2, etc). Any other format causes the file to abandon """
 """ the modification. Through each (col=tag, col2=tag2, etc), we change """
@@ -318,7 +348,7 @@ def handleUpdates(matches, dynamicDB):
 """ @:param: matches, a list of strings of words """
 """ @:param: dynamicDB, the key value store maintained in the program """
 """ @:return: None """
-def handleSearches(matches, dynamicDB):
+def handleSearches(matches, dynamicDB, isFind=False):
     # 1. VALUES(col=tag, col2=tag2, col3=tag3….)
     # 2. VALUES(pattern1, pattern2, pattern3)
     # 3. KEY AND VALUES(pattern1, pattern2, pattern3)
@@ -329,12 +359,21 @@ def handleSearches(matches, dynamicDB):
             SEARCH VALUES (col1=pattern1, col2=pattern2, col3=pattern3….) \n \
             SEARCH VALUES (pattern1, pattern2, pattern3) \n \
             SEARCH KEY AND VALUES (pattern1, pattern2, pattern3) \ "
+    findUsage = "Usage: FIND [opt:ratio] (pattern1, pattern2,…) \n \
+                FIND [opt:ratio] VALUES (col1=pattern1, col2=pattern2, col3=pattern3….) \n \
+                FIND [opt:ratio] VALUES (pattern1, pattern2, pattern3) \n \
+                FIND [opt:ratio] KEY AND VALUES (pattern1, pattern2, pattern3) \ "
     error = False
     toWrite = ''
+    limit = 0.8
+    if isFind:
+        try:
+            limit = float(matches[0].lower())
+            matches = matches[1:]
+        except:
+            limit = 0.8
     if matches[0].lower() == "values":
         # Collect column names if necessary
-        cols = []
-        patterns = []
         matches = matches[1:]
         if len(matches) == 0:
             print("Invalid format!"
@@ -344,34 +383,61 @@ def handleSearches(matches, dynamicDB):
             error = True
         # If columns are called with patterns, then we separate the matches
         # out to their corresponding lists to be called in printSearchResult.
-        if matches[0].find('=') != -1:
-            for match in matches:
-                match = match.split('=')
-                if len(match) != 2:
-                    print("Column types must be associated with column values!"
-                          " As a reminder, "
-                          "the usage is below: \n ", usage)
-                    error = True
-                    break
-                else:
-                    cols.append(match[0])
-                    patterns.append(match[1])
-        else:
-            patterns = matches
-        toWrite += printSearchResult(False, True, cols, patterns)
+
+
+        compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
+        for item in compList:
+            cols = []
+            patterns = []
+            print(item)
+                #listOfKeys += findMatchingKeys('', item, dynamicDB)
+        #else:
+            #listOfKeys = findMatchingKeys('', matches, dynamicDB)
+            if item[0].find('=') != -1:
+                for match in item:
+                    match = match.split('=')
+                    if len(match) != 2:
+                        print("Column types must be associated with column values!"
+                                " As a reminder, "
+                                "the usage is below: \n ", usage)
+                        error = True
+                        break
+                    else:
+                        cols.append(match[0])
+                        patterns.append(match[1])
+            else:
+                patterns = item
+            toWrite += printSearchResult(False, True, cols, patterns, isFind, limit)
+            print(toWrite)
+            print(len(toWrite))
     # Case 3 (we are looking through keys and values, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key" and matches[1].lower() == "and" and\
             matches[2].lower() == "values" or matches[0] == "*":
-        toWrite += printSearchResult(True, True, [], matches[3:])
+        if "or" in matches or "OR" in matches:
+            compList = (list(g) for k, g in groupby(matches[3:], key=lambda x: x.lower() != 'or') if k)
+            for item in compList:
+                toWrite += printSearchResult(True, True, [], item, isFind, limit)
+        else:
+            toWrite += printSearchResult(True, True, [], matches[3:], isFind, limit)
     # Case 4 (we are looking through keys, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key":
-        toWrite += printSearchResult(True, False, [], matches[1:])
+        if "or" in matches or "OR" in matches:
+            compList = (list(g) for k, g in groupby(matches[1:], key=lambda x: x.lower() != 'or') if k)
+            for item in compList:
+                toWrite += printSearchResult(True, False, [], matches[1:], isFind, limit)
+        else:
+            toWrite += printSearchResult(True, False, [], matches[1:], isFind, limit)
     else:
-        print("Invalid format! Either your key is not in the store,"
-              "or you are following incorrect format. As a reminder, "
-              "the usage is below: \n ", usage)
+        if isFind:
+            print("Invalid format! Either your key is not in the store,"
+                  "or you are following incorrect format. As a reminder, "
+                  "the usage is below: \n ", findUsage)
+        else:
+            print("Invalid format! Either your key is not in the store,"
+                  "or you are following incorrect format. As a reminder, "
+                  "the usage is below: \n ", usage)
         error = True
     if not error and toWrite != '':
         printSelectsSearches("searchResult.txt", toWrite)
@@ -516,7 +582,14 @@ def handleSelects(matches, dynamicDB):
             print("The key is not in the store!")
     elif matches[1].lower() == 'where' and len(matches) >= 4:
         matches = matches[2:]
-        listOfKeys = findMatchingKeys('', matches, dynamicDB)
+        listOfKeys = []
+        if "or" in matches or "OR" in matches:
+            compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
+            for item in compList:
+                print(item)
+                listOfKeys += findMatchingKeys('', item, dynamicDB)
+        else:
+            listOfKeys = findMatchingKeys('', matches, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
@@ -564,7 +637,13 @@ def handleDeletes(matches, dynamicDB):
               " col2=tag2, col3=tag3...)")
         error = True
     if error == False:
-        selectedKeys = findMatchingKeys(key, matches, dynamicDB)
+        if "or" in matches or "OR" in matches:
+            compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
+            for item in compList:
+                print(item)
+                selectedKeys += findMatchingKeys(key, item, dynamicDB)
+        else:
+            selectedKeys = findMatchingKeys(key, matches, dynamicDB)
     return selectedKeys
 
 
@@ -646,6 +725,8 @@ def handleInput(command, dynamicDB):
         handleSearches(matches, dynamicDB)
     elif matches[0].lower() == 'update':
         updateResults = handleUpdates(matches, dynamicDB)
+    elif matches[0].lower() == 'find':
+        handleSearches(matches, dynamicDB, True)
     return insertedRows, deletedKeys, updateResults
 
 
