@@ -10,6 +10,7 @@ import string
 import difflib
 from itertools import groupby
 from jsonpath_ng import jsonpath, parse
+import operator
 
 # Note: all global variables will not be modified
 # size of blocks of memory in bytes
@@ -108,6 +109,98 @@ def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
             file1.write(toByte1)
 
 
+def processAndandOrs(findInKeys, findInVals, matches, usage, toFind=False, limit=0.8):
+    # Since identification was only specified by
+    # rows, we need to filter the rows by each column specified.
+    filterItems = dynamicDB.keys()
+    toWrite = ""
+    #print(len(matches))
+    #print(matches)
+    #matches = matches[0]
+    print(matches)
+    result = []
+    for andClauses in matches:
+        setOfKeys = set()
+        for orClause in andClauses:
+            print("orclauses",orClause)
+            line = orClause
+            if line[0].find('=') != -1:
+                lineList = line.split('=')
+                if len(lineList) % 2 != 0:
+                    print("Column types must be associated with column values!"
+                          " As a reminder, "
+                          "the usage is below: \n ", usage)
+                    error = True
+                    break
+                else:
+                    cols = lineList[0::2]
+                    patterns = lineList[1::2]
+                    setOfKeys = setOfKeys.union(printSearchResult(findInKeys, findInVals, cols, patterns, filterItems, toFind=False, limit=0.8))
+                    #print(printSearchResult(findInKeys, findInVals, cols, patterns, filterItems, toFind=False, limit=0.8))
+            else:
+                setOfKeys = setOfKeys.union(printSearchResult(findInKeys, findInVals, '', line, filterItems, toFind=False, limit=0.8))
+                #print(printSearchResult(findInKeys, findInVals, '', line, filterItems, toFind=False, limit=0.8))
+        result.append(setOfKeys)
+    print(len(result))
+    setOfKeys = result[0]
+    print(setOfKeys)
+    for i in range(1, len(result)):
+        print("wkjkej")
+        setOfKeys = setOfKeys & result[i]
+    print(len(setOfKeys))
+    filterItems = list(setOfKeys)
+    if len(filterItems) == 0:
+        print("Sorry, nothing in the store matches! Check your input or "
+              "column types.")
+    else:
+        # We print each row that we selected.
+        for each in filterItems:
+            toWrite += each + ": " + json.dumps(dynamicDB[each]['data']) + '\n'
+        toWrite += str(len(filterItems)) + " items found.\n"
+    return toWrite
+
+
+
+def processAndandOrs2(key, values, dynamicDB):
+    # Since identification was only specified by
+    # rows, we need to filter the rows by each column specified.
+    if len(values) == 1:
+        return findMatchingKeys(key, values, dynamicDB)
+    filterItems = dynamicDB.keys()
+    toWrite = ""
+    #print(len(matches))
+    #print(matches)
+    #matches = matches[0]
+    #print(matches)
+    result = []
+    for andClauses in values:
+        setOfKeys = set()
+        for orClause in andClauses:
+            print("orclauses",orClause)
+            line = orClause
+            setOfKeys = setOfKeys.union(findMatchingKeys(key, line, dynamicDB))
+                    #print(printSearchResult(findInKeys, findInVals, cols, patterns, filterItems, toFind=False, limit=0.8))
+                #print(printSearchResult(findInKeys, findInVals, '', line, filterItems, toFind=False, limit=0.8))
+        result.append(setOfKeys)
+    print(len(result))
+    setOfKeys = result[0]
+    print(setOfKeys)
+    for i in range(1, len(result)):
+        print("wkjkej")
+        setOfKeys = setOfKeys & result[i]
+    print(len(setOfKeys))
+    filterItems = list(setOfKeys)
+    if len(filterItems) == 0:
+        print("Sorry, nothing in the store matches! Check your input or "
+              "column types.")
+    else:
+        # We print each row that we selected.
+        for each in filterItems:
+            toWrite += each + ": " + json.dumps(dynamicDB[each]['data']) + '\n'
+        toWrite += str(len(filterItems)) + " items found.\n"
+    return toWrite
+
+
 """ printSearchResult filters per pattern. For each pattern specified,"""
 """ each row is examined if the pattern is found in a key (if specified) or """
 """ values (again, if specified). The filtered items are printed. """
@@ -116,11 +209,14 @@ def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
 """ @:param: cols, the column types to search through """
 """ @:param: patterns, the values to look through """
 """ @:return: toWrite, the string that will be written to the file """
-def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limit=0.8):
-    # Since identification was only specified by
-    # rows, we need to filter the rows by each column specified.
-    filterItems = dynamicDB
-    toWrite = ""
+def printSearchResult(findInKeys, findInVals, cols, patterns, selectKeys, toFind=False, limit=0.8):
+    selected = set()
+    filterItems = {}
+    for each in selectKeys:
+        newVal = {}
+        newVal[each] = dynamicDB[each]
+        filterItems.update(newVal)
+        #filterItems.update()
     for colIndex in range(0, len(patterns)):
         col = ''
         # If there is a column name associated
@@ -129,10 +225,9 @@ def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limi
         if cols:
             col = cols[colIndex]
         val = patterns[colIndex]
-        selected = {}
         # We filter each row from the
         # filtered key value store.
-        for item1 in filterItems:
+        for item1 in selectKeys:
             # We examine if a pattern is in a key if necessary.
             if findInKeys:
                 ratioDistance = 0
@@ -142,9 +237,7 @@ def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limi
                 predicate = (item1.find(val) != -1) or (toFind and
                                                         ratioDistance > limit)
                 if predicate:
-                    newVal = {}
-                    newVal[item1] = filterItems[item1]
-                    selected.update(newVal)
+                    selected.add(item1)
                     continue
             # We examine if a pattern is in a key if necessary.
             # If a column is associated with the pattern,
@@ -152,6 +245,8 @@ def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limi
             # matches the value at that column.
             if findInVals:
                 for item2 in filterItems[item1]['data']:
+                    if item2 is None:
+                        continue
                     ratioDistance = 0
                     if toFind and col != '':
                         ratioDistance = difflib.SequenceMatcher(None, item2,
@@ -163,6 +258,8 @@ def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limi
                                                             ratioDistance > limit)
                     if col == '' or predicate:
                         item3 = filterItems[item1]['data'][item2]
+                        if item3 is None:
+                            continue
                         if toFind:
                             ratioDistance = difflib.SequenceMatcher(None, item3,
                                                                     val).ratio()
@@ -174,20 +271,10 @@ def printSearchResult(findInKeys, findInVals, cols, patterns, toFind=False, limi
                         #print(item3)
 
                         if predicate:
-                            newVal = {}
-                            newVal[item1] = filterItems[item1]
-                            selected.update(newVal)
+                            selected.add(item1)
                             #print("updated")
-        filterItems = selected
-    if len(filterItems) == 0:
-        print("Sorry, nothing in the store matches! Check your input or "
-              "column types.")
-    else:
-        # We print each row that we selected.
-        for each in filterItems:
-            toWrite += each + ": " + json.dumps(dynamicDB[each]['data']) + '\n'
-        toWrite += str(len(filterItems)) + " items found.\n"
-    return toWrite
+        return selected
+
 
 
 """ findMatchingKeys removes the values or values assicated with the key """
@@ -254,7 +341,9 @@ def generateNewRows(colValList):
     for i in range(0, len(colValList), 2):
         if colValList[i] not in typesSet:
             typesSet.add(colValList[i])
-        newValues[colValList[i]] = colValList[i + 1]
+        print(str(colValList[i + 1]))
+        newValues[colValList[i]] = ast.literal_eval(str(colValList[i + 1]))
+    print(newValues)
     return newValues
 
 
@@ -289,7 +378,7 @@ def handleUpdates(matches, dynamicDB):
     newOldRows = ()
     error = False
     usage = "Usage:\n UPDATE [key] WITH  VALUES (col=tag, col2=tag2...) \n"
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     if matches[2].lower() == 'with' and matches[3].lower() == 'values' \
             and len(matches) >= 5:
@@ -384,51 +473,29 @@ def handleSearches(matches, dynamicDB, isFind=False):
         # If columns are called with patterns, then we separate the matches
         # out to their corresponding lists to be called in printSearchResult.
 
+        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'and')) if k))
+        for i in range(0, len((compList))):
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            compList[i] = item
 
-        compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
-        for item in compList:
-            cols = []
-            patterns = []
-            print(item)
-                #listOfKeys += findMatchingKeys('', item, dynamicDB)
-        #else:
-            #listOfKeys = findMatchingKeys('', matches, dynamicDB)
-            if item[0].find('=') != -1:
-                for match in item:
-                    match = match.split('=')
-                    if len(match) != 2:
-                        print("Column types must be associated with column values!"
-                                " As a reminder, "
-                                "the usage is below: \n ", usage)
-                        error = True
-                        break
-                    else:
-                        cols.append(match[0])
-                        patterns.append(match[1])
-            else:
-                patterns = item
-            toWrite += printSearchResult(False, True, cols, patterns, isFind, limit)
-            print(toWrite)
-            print(len(toWrite))
+        toWrite += processAndandOrs(False, True, compList, usage, isFind, limit)
     # Case 3 (we are looking through keys and values, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key" and matches[1].lower() == "and" and\
             matches[2].lower() == "values" or matches[0] == "*":
-        if "or" in matches or "OR" in matches:
-            compList = (list(g) for k, g in groupby(matches[3:], key=lambda x: x.lower() != 'or') if k)
-            for item in compList:
-                toWrite += printSearchResult(True, True, [], item, isFind, limit)
-        else:
-            toWrite += printSearchResult(True, True, [], matches[3:], isFind, limit)
+        compList = list((list(g) for k, g in groupby(matches[3:], key=lambda x: (x.lower() != 'and')) if k))
+        for i in range(0, len((compList))):
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            compList[i] = item
+        toWrite += processAndandOrs(True, True, compList, usage, isFind, limit)
     # Case 4 (we are looking through keys, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key":
-        if "or" in matches or "OR" in matches:
-            compList = (list(g) for k, g in groupby(matches[1:], key=lambda x: x.lower() != 'or') if k)
-            for item in compList:
-                toWrite += printSearchResult(True, False, [], matches[1:], isFind, limit)
-        else:
-            toWrite += printSearchResult(True, False, [], matches[1:], isFind, limit)
+        compList = list((list(g) for k, g in groupby(matches[1:], key=lambda x: (x.lower() != 'and')) if k))
+        for i in range(0, len((compList))):
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            compList[i] = item
+        toWrite += processAndandOrs(True, False, compList, usage, isFind, limit)
     else:
         if isFind:
             print("Invalid format! Either your key is not in the store,"
@@ -540,7 +607,7 @@ def printSelectsSearches(default_file, toWrite):
 """ @:param: dynamicDB, the key value store maintained in the program """
 """ @:return: None """
 def handleSelects(matches, dynamicDB):
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     toWrite = ''
     new_input = ''
@@ -579,21 +646,54 @@ def handleSelects(matches, dynamicDB):
                     ['isFree'] == 'false':
             print(dynamicDB[matches[1].lower()]['data'], '\n')
         else:
-            print("The key is not in the store!")
+            copy = {'data' : dynamicDB}
+            some_str = "data.." + matches[1]
+            #print(some_str)
+            expr = parse(some_str)
+            vals = set()
+            for match in expr.find(copy):
+                vals.add(str(match.value))
+            toWrite += str(vals)
+            new_input = 'trivials.txt'
+            if toWrite == '':
+                print("The key or column key is not in the store!")
     elif matches[1].lower() == 'where' and len(matches) >= 4:
         matches = matches[2:]
         listOfKeys = []
-        if "or" in matches or "OR" in matches:
-            compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
-            for item in compList:
-                print(item)
-                listOfKeys += findMatchingKeys('', item, dynamicDB)
-        else:
-            listOfKeys = findMatchingKeys('', matches, dynamicDB)
+
+        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'and')) if k))
+        for i in range(0, len((compList))):
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            compList[i] = item
+        listOfKeys += findMatchingKeys('', compList, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
+    elif matches[2] in "+-*/":
+        ops = {"+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.truediv}
+        result = 0
+        start = 0
+        while True:
+            copy = {'data': dynamicDB}
+            some_str = "data.." + matches[1]
+            # print(some_str)
+            expr = parse(some_str)
+            vals = set()
+            for match in expr.find(copy):
+                vals.add(str(match.value))
+            toWrite += str(vals)
+            new_input = 'trivials.txt'
+
+            print(matches[start + 1])
+            if matches[start + 1] is None:
+                continue
+            if matches[start + 1].isdigit():
+                print("true")
+                result = ops[matches[start + 2]](result, int(matches[start + 3]))
+            else:
+                print("One of your selected colums is not a digit.")
+                break
     else:
         error = True
     if toWrite != '':
@@ -617,7 +717,7 @@ def handleDeletes(matches, dynamicDB):
     key = ''
     selectedKeys = []
     error = False
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     # This is if the input is in the form DELETE VALUES (col=tag, col2=tag2...)
     if matches[1].lower() == 'values' and len(matches) >= 3:
@@ -637,13 +737,11 @@ def handleDeletes(matches, dynamicDB):
               " col2=tag2, col3=tag3...)")
         error = True
     if error == False:
-        if "or" in matches or "OR" in matches:
-            compList = (list(g) for k, g in groupby(matches, key=lambda x: x.lower() != 'or') if k)
-            for item in compList:
-                print(item)
-                selectedKeys += findMatchingKeys(key, item, dynamicDB)
-        else:
-            selectedKeys = findMatchingKeys(key, matches, dynamicDB)
+        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'and')) if k))
+        for i in range(0, len((compList))):
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            compList[i] = item
+        selectedKeys += processAndandOrs2(key, compList, dynamicDB)
     return selectedKeys
 
 
@@ -661,7 +759,7 @@ def handleInserts(matches, dynamicDB):
     key = ''
     values = {}
     row = {}
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     # This is if the user inputs in the format
     # INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….)
@@ -684,6 +782,8 @@ def handleInserts(matches, dynamicDB):
         matches = matches[2:]
         while key in dynamicDB or key == '':
             key = generateRandomKey()
+        print(matches)
+        print("Going to generateNewRows...")
         values = generateNewRows(matches)
     else:
         print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
@@ -710,7 +810,7 @@ def handleInserts(matches, dynamicDB):
 def handleInput(command, dynamicDB):
     # check the inputs
     # TODO: Change command to lowercase, pass in removed command
-    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+=]+', re.IGNORECASE)
+    parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'"]+', re.IGNORECASE)
     matches = parser.findall(command)
     insertedRows = {}
     deletedKeys = []
@@ -728,6 +828,62 @@ def handleInput(command, dynamicDB):
     elif matches[0].lower() == 'find':
         handleSearches(matches, dynamicDB, True)
     return insertedRows, deletedKeys, updateResults
+
+
+""" setUpDatabase2 initilizes the key value store from an existing JSON """
+""" file. Currently, the JSON file is from                             """
+""" https://data.cdc.gov/api/views/cjae-szjv/rows.json?accessType=DOWNLOAD """
+""" and the associated values are configured to this dataset. """
+""" Specifically, the data is stored in a dictionary, which holds """
+""" a tag specifying if the block is free and can be overwritten (which is """
+""" initialized to false). Other items stored in the values itself is a """
+""" dictionary which includes an id associated with the measurement, type """
+""" of measurement, an id associated with a specific state, that state's """
+""" name, an id associated with a county, that county's name, year of """
+""" measurement, and if there are any units, then its name and symbol. """
+""" @param: fileName, the name of the json file to load the initial rows """
+"""         from """
+""" @return: measurementStore, the newly set up key value store, to be """
+"""          dynamicDB (see loadFile)"""
+def setUpDatabase2(filename):
+    # Open and load the file (the with clause ensures the file closes,
+    # even if there is an exception raised).
+    #filename = 'leadingCauses.json'
+    with open(filename, 'r') as airMeasurementsJSON:
+        airMeasurements = json.load(airMeasurementsJSON)
+    assert airMeasurementsJSON.closed
+
+    jsonpath_expr = parse('meta..columns')
+    vals = [match.value for match in jsonpath_expr.find(airMeasurements)]
+    original_length = len(vals)
+    vals = [val for val in vals[0] if val['id'] != -1]
+    skipItems = original_length - len(vals) - 1
+    typesSet = []
+    for val in vals:
+        typesSet.append(val['name'].lower())
+
+    # Set up the key value store dictionary, which is
+    # written to the file at a later point.
+    key = ''
+    measurementStore = {}
+    positionCounter = 0
+    for measurement in airMeasurements['data']:
+        # Free or not? 0 indicates not free, 1 indicates free
+        items = dict(isFree='false', position=positionCounter)
+        values = dict()
+        for itm, type1 in zip(range(skipItems, len(typesSet) + skipItems), typesSet):
+            values[type1] = measurement[itm]
+        items['data'] = values
+        measurementStore[measurement[0]] = items
+        positionCounter += 1
+
+    #print(measurementStore)
+    #print(type(measurementStore))
+    #lastKey = ast.literal_eval(measurementStore[-1])
+    #print(measurementStore[key]['data'])
+    #print(measurementStore)
+    return measurementStore
+
 
 
 """ setUpDatabase initilizes the key value store from an existing JSON """
@@ -806,6 +962,8 @@ def loadFile(defaultFile, storageDBFile, isNewDBFile, maximumPosition):
             rows = [line.strip().decode('utf-8').replace('\0', '') for line
                     in file if line.strip()]
         for row in rows:
+            if 'null' in row:
+                row = row.replace('null', "None")
             dynamicDB.update(ast.literal_eval(row))
         lastKey = ast.literal_eval(rows[-1])
         for key in lastKey.keys():
@@ -813,7 +971,7 @@ def loadFile(defaultFile, storageDBFile, isNewDBFile, maximumPosition):
     else:
         isNewDBFile = True
         if os.path.isfile(defaultFile):
-            dynamicDB = setUpDatabase(defaultFile)
+            dynamicDB = setUpDatabase2(defaultFile)
         else:
             raise Exception('Need json file from '
                             'https://data.cdc.gov/api/views/cjae-'
@@ -899,8 +1057,8 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
 if __name__ == "__main__":
     print("Loading...\n")
     # dynamicDB = {}
-    defaultFile = 'AirQualityMeasures.json'
-    storageDBFile = 'AirQualityDBStore.bin'
+    defaultFile = 'CityData.json'
+    storageDBFile = 'CityData.bin'
     isNewDBFile = False
     insertedRows = {}
     deletedKeys = []
