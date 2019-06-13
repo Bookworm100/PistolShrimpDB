@@ -6,7 +6,7 @@ class Delete:
     #def super(Insert, self).super()
     def __init__(self, matches, typesSet):
         self.matches = matches
-        self.insertedRow = {}
+        self.selectedKeys = []
         self.typesSet = typesSet
 
     """ handleDeletes passes either a key or a set of values to the function """
@@ -21,7 +21,6 @@ class Delete:
 
     def handleDeletes(self, dynamicDB):
         key = ''
-        selectedKeys = []
         error = False
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
         matches = parser.findall(" ".join(self.matches))
@@ -43,5 +42,5 @@ class Delete:
                   " col2=tag2, col3=tag3...)")
             error = True
         if error == False:
-            selectedKeys += AndsandOrs.processAndandOrs2(key, matches, dynamicDB)
-        return selectedKeys
+            self.selectedKeys += AndsandOrs.processAndandOrs2(key, matches, dynamicDB)
+        return self.selectedKeys

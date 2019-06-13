@@ -14,6 +14,7 @@ import operator
 from InputFile import inputFile
 from Insert import Insert
 from Delete import Delete
+from Update import Update
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1161,13 +1162,14 @@ class pistolShrimpStore:
             changesMade = renamed(matches[1].lower(), matches[2].lower())
         elif matches[0].lower() == 'delete':
             changesMade = Delete(matches, typesSet)
+        elif matches[0].lower() == 'update':
+            changesMade = Update(matches, typesSet)
         """elif matches[0].lower() == 'select':
             handleSelects(matches, dynamicDB)
         elif matches[0].lower() == 'search':
-            handleSearches(matches, dynamicDB)
-        elif matches[0].lower() == 'update':
-            updateResults = handleUpdates(matches, dynamicDB)
-        elif matches[0].lower() == 'find':
+            handleSearches(matches, dynamicDB)"""
+
+        """elif matches[0].lower() == 'find':
             handleSearches(matches, dynamicDB, True)"""
         return changesMade
 
@@ -1286,7 +1288,22 @@ class pistolShrimpStore:
                             if item in self.updatedRows:
                                 del self.updatedRows[item]
                             print("Successfully deleted ", item, ": ",
-                                  dynamicDB[item]['data'], "\n")
+                                  self.dynamicDB[item]['data'], "\n")
+                    elif type(handleValue) == Update:
+                        updatedRow, replacedRow = handleValue.handleUpdates(self.dynamicDB)
+                        if updatedRow is not None and len(updatedRow) > 0:
+                            for key in updatedRow:
+                                # If this is a new row (inserted after loading the
+                                # storage
+                                # file), then we simply change the inserted value.
+                                if key in self.insertedRows:
+                                    self.insertedRows[key] = updatedRow[key]
+                                else:
+                                    self.updatedRows.update(updatedRow)
+                                    if key not in self.replacedRows:
+                                        self.replacedRows.update(replacedRow)
+                                print("Successfully updated ", key, ": ",
+                                      self.dynamicDB[key]['data'], "\n")
 
         if toSave:
             print("Hooray!")
