@@ -13,6 +13,7 @@ from jsonpath_ng import jsonpath, parse
 import operator
 from InputFile import inputFile
 from Insert import Insert
+from Delete import Delete
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1043,6 +1044,75 @@ from Insert import Insert
 #         updateFileWithDeletes(storageDBFile, indicesToDelete)
 #     if len(insertedRows) > 0:
 #         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+""" findMatchingKeys removes the values or values assicated with the key """
+""" from the dictionary holding the database, and keep track of what might """
+""" be removed from the storage file upon exiting or quitting. """
+""" @:param: key, an argument which when provided is returned """
+""" @:param: values, the list of values """
+""" @:param: dynamicDB, the key value store maintained in the program """
+""" @:return: selectedKeys, the list of keys to be displayed or deleted """
+"""           from the store """
+def findMatchingKeys(key, values, dynamicDB):
+    selectedKeys = []
+    # If the key-value to delete is simply
+    # identifiable by a key, we simply
+    # mark that key for deletion.
+    if len(values) == 1:
+        selectedKeys.append(key)
+    else:
+        # Since identification was only specified by
+        # rows, we need to filter the rows by each column specified
+        # and mark these keys for deletion.
+        filterItems = dynamicDB
+        # Check that all tags/columns are matched correctly
+        if len(values) % 2 == 1:
+            print("Column types must be associated with column values!")
+            return []
+
+        selected = {}
+        for item1 in filterItems:
+            include = True
+            newVal = {}
+            for colIndex in range(0, len(values), 2):
+                col = values[colIndex]
+                val = values[colIndex + 1]
+                if col in filterItems[item1]['data'] \
+                        and filterItems[item1]['isFree'] == 'false':
+                    if filterItems[item1]['data'][col] != val:
+                        include = False
+                else:
+                    include = False
+            if include == True:
+                newVal[item1] = filterItems[item1]
+                selected.update(newVal)
+        if len(selected) == 0:
+            print("Sorry, nothing in the store matches! Check your input or "
+                  "column types.")
+            return []
+        for item in selected:
+            selectedKeys.append(item)
+
+        """for colIndex in range(0, len(values), 2):
+            col = values[colIndex]
+            val = values[colIndex + 1]
+            selected = {}
+            for item1 in filterItems:
+                if col in filterItems[item1]['data'] \
+                        and filterItems[item1]['isFree'] == 'false':
+                    if filterItems[item1]['data'][col] == val:
+                        newVal = {}
+                        newVal[item1] = filterItems[item1]
+                        selected.update(newVal)
+            filterItems = selected
+        if len(filterItems) == 0:
+            print("Sorry, nothing in the store matches! Check your input or "
+                  "column types.")
+            return []
+        for item in filterItems:
+            selectedKeys.append(item)"""
+    return selectedKeys
+
+
 class renamed:
     def __init__(self, col1, col2):
         self.original = col1
@@ -1089,9 +1159,9 @@ class pistolShrimpStore:
             #insertedRows = handleInserts(matches, dynamicDB)
         elif matches[0].lower() == 'rename':
             changesMade = renamed(matches[1].lower(), matches[2].lower())
-        """elif matches[0].lower() == 'delete':
-            deletedKeys = handleDeletes(matches, dynamicDB)
-        elif matches[0].lower() == 'select':
+        elif matches[0].lower() == 'delete':
+            changesMade = Delete(matches, typesSet)
+        """elif matches[0].lower() == 'select':
             handleSelects(matches, dynamicDB)
         elif matches[0].lower() == 'search':
             handleSearches(matches, dynamicDB)
@@ -1197,6 +1267,27 @@ class pistolShrimpStore:
                         for key in newRow:
                             print("Successfully inserted ", key, ": ",
                                   newRow[key]['data'], "\n")
+                    elif type(handleValue) == Delete:
+                        row = handleValue.handleDeletes(self.dynamicDB)
+                        for item in row:
+                            dynamicDB[item]['isFree'] = 'true'
+                            # This is in the storage file, so
+                            # we should erase them.
+                            if 'position' in dynamicDB[item]:
+                                self.deletedKeys.append(item)
+                            else:
+                                # This was a new row, so we do not
+                                # want to write this to the file.
+                                del self.insertedRows[item]
+                            # If there were rows updated, we
+                            # want to make sure these aren't
+                            # written to the file because they
+                            # were deleted.
+                            if item in self.updatedRows:
+                                del self.updatedRows[item]
+                            print("Successfully deleted ", item, ": ",
+                                  dynamicDB[item]['data'], "\n")
+
         if toSave:
             print("Hooray!")
             #saveChanges(isNewDBFile, storageDBFile, dynamicDB,
