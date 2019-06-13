@@ -1043,6 +1043,11 @@ from Insert import Insert
 #         updateFileWithDeletes(storageDBFile, indicesToDelete)
 #     if len(insertedRows) > 0:
 #         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+class renamed:
+    def __init__(self, col1, col2):
+        self.original = col1
+        self.new = col2
+
 class pistolShrimpStore:
 
     def __init__(self, storageFile, dynamicDB, isNewDBFile, maximumPosition,
@@ -1082,6 +1087,8 @@ class pistolShrimpStore:
         if matches[0].lower() == 'insert':
             changesMade = Insert(matches, self.typesSet)
             #insertedRows = handleInserts(matches, dynamicDB)
+        elif matches[0].lower() == 'rename':
+            changesMade = renamed(matches[1].lower(), matches[2].lower())
         """elif matches[0].lower() == 'delete':
             deletedKeys = handleDeletes(matches, dynamicDB)
         elif matches[0].lower() == 'select':
@@ -1101,6 +1108,7 @@ class pistolShrimpStore:
         self.deletedKeys.clear()
         self.updatedRows.clear()
         self.replacedRows.clear()
+        self.renamedColumns.clear()
 
     def saveChanges(self):
         print("To be implemented")
@@ -1115,6 +1123,13 @@ class pistolShrimpStore:
         for each in self.replacedRows:
             self.dynamicDB[each] = self.replacedRows[each]
 
+        for each in dynamicDB:
+            for tup in self.renamedColumns:
+                col2, col1 = tup
+                reassigned = dynamicDB[each]['data'][col1]
+                del dynamicDB[each]['data'][col1]
+                dynamicDB[each]['data'][col2] = reassigned
+
         print("Successfully undoed ", len(self.insertedRows),
               " insertions, ", len(self.deletedKeys), " deletions, and ",
               len(self.updatedRows), " updates!", "\n")
@@ -1128,6 +1143,18 @@ class pistolShrimpStore:
         print("Successfully saved ", len(self.insertedRows), " insertions, "
               , len(self.deletedKeys), " deletions, and ",
               len(self.updatedRows), " updates!", "\n")
+
+    def handleRenamed(self, handleValue):
+        col1 = handleValue.original
+        col2 = handleValue.new
+        tup = (col1, col2)
+        for each in dynamicDB:
+            if col1 in dynamicDB[each]['data']:
+                reassigned = dynamicDB[each]['data'][col1]
+                del dynamicDB[each]['data'][col1]
+                dynamicDB[each]['data'][col2] = reassigned
+        self.renamedColumns.append(tup)
+        print("Successfully renamed ", col1, " as ", col2,"!")
 
     def run(self):
         # This section handles user input and passes it to
@@ -1161,7 +1188,9 @@ class pistolShrimpStore:
 
                 # check the class
                 if handleValue is not None:
-                    if type(handleValue) == Insert:
+                    if type(handleValue) == renamed:
+                        self.handleRenamed(handleValue)
+                    elif type(handleValue) == Insert:
                         newRow = handleValue.handleInserts(self.dynamicDB)
                         self.insertedRows.update(newRow)
                         self.dynamicDB.update(newRow)
