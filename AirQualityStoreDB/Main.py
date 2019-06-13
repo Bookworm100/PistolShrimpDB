@@ -16,6 +16,7 @@ from Insert import Insert
 from Delete import Delete
 from Update import Update
 import OutputFile
+import Selects
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1046,6 +1047,79 @@ import OutputFile
 #         updateFileWithDeletes(storageDBFile, indicesToDelete)
 #     if len(insertedRows) > 0:
 #         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+""" This handles the printing of selects to a file or output. """
+""" First, the user is prompted to indicate whether to print the """
+""" output to terminal. Next, if the output is large, and the user """
+""" indicates that they would like the output to be printed to the """
+""" terminal, the user is notified, and is prompted whether they want to """
+""" proceed with printing to terminal. In the case that they want to """
+""" print to file, the user is prompted to indicate if they would like """
+""" to specify a file to store the output. If not, the given default """
+""" filename is used. If so, then the program attempts to open or create """
+""" the file, and if an error is thrown in case the file cannot be created, """
+""" then, the user is prompted to indicate if they would like to specify a """
+""" file to store the output. This repeats until the user types in N, or """
+""" if they specify a valid file path. In any case the user is prompted to """
+""" type Y or N and they do not, they are prompted again to type Y or N. """
+""" @:param: default_file, the file that results will be written to if no """
+"""          file is specified by the user"""
+""" @:param: toWrite, the string that will be written to the file """
+""" @:return: None """
+def printSelectsSearches(default_file, toWrite):
+    written = False
+    # Does the user want to print output to the terminal?
+    n = input("Would you like to print the output to the terminal?"
+              " Type Y or N only. \n")
+    # In case of invalid output
+    while n.lower() != "y" and n.lower() != "n":
+        n = input("Sorry, we did not quite understand. Please type "
+                  "Y only if you want to print to output or N"
+                  "if you don't and want to print to a file.\n")
+    # The user must confirm if the size of the output
+    # is big.
+    if n.lower() == "y" and sys.getsizeof(toWrite) > 2000:
+        n = input("The size of the output is pretty big. "
+                  "Are you sure? Again, type Y or N.\n ")
+        while n.lower() != "y" and n.lower() != "n":
+            n = input("Sorry, we did not quite understand. Please type "
+                      "Y only if you want to print to output or N"
+                      "if you don't and want to print to a file,"
+                      "given that the file size is big.\n")
+    # Print to terminal here.
+    if n.lower() == "y":
+        print(toWrite)
+    else:
+        # The user is prompted to indicate if they want to use a custom file.
+        n = input("Would you like to create a custom file with the output?"
+                  " Type Y or N only. \n")
+        # TODO n = n.lower()
+        while not written:
+            try:
+                new_input = default_file
+                # If the input is invalid
+                while n.lower() != "y" and n.lower() != "n":
+                    n = input("Sorry, we did not quite understand. Please type"
+                          " Y only if you want to create a custom file or N"
+                        "if you don't and want to use our custom file.\n")
+                # The user types in the desired file path.
+                if n.lower() == "y":
+                    new_input = input("Please type in the file name, which can"
+                                  " include the path if it's not being stored"
+                                  " in the location of this program:\n")
+                # The file is opened or created for writing.
+                with open(new_input, 'w') as file:
+                    file.write(toWrite)
+                    written = True
+            except IOError:
+                # In the case the file cannot be created, the user is
+                # asked if they changed their mind and want to use the
+                # default file instead.
+                n = input("Sorry, this path seems to be invalid."
+                              " Would you still like to create a custom file? "
+                              " Again, type Y or N.\n")
+
+
+
 """ findMatchingKeys removes the values or values assicated with the key """
 """ from the dictionary holding the database, and keep track of what might """
 """ be removed from the storage file upon exiting or quitting. """
@@ -1165,11 +1239,10 @@ class pistolShrimpStore:
             changesMade = Delete(matches, typesSet)
         elif matches[0].lower() == 'update':
             changesMade = Update(matches, typesSet)
-        """elif matches[0].lower() == 'select':
-            handleSelects(matches, dynamicDB)
-        elif matches[0].lower() == 'search':
+        elif matches[0].lower() == 'select':
+            Selects.handleSelects(matches, dynamicDB)
+        """elif matches[0].lower() == 'search':
             handleSearches(matches, dynamicDB)"""
-
         """elif matches[0].lower() == 'find':
             handleSearches(matches, dynamicDB, True)"""
         return changesMade
