@@ -17,6 +17,7 @@ from Delete import Delete
 from Update import Update
 import OutputFile
 import Selects
+import Search
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1241,10 +1242,10 @@ class pistolShrimpStore:
             changesMade = Update(matches, typesSet)
         elif matches[0].lower() == 'select':
             Selects.handleSelects(matches, dynamicDB)
-        """elif matches[0].lower() == 'search':
-            handleSearches(matches, dynamicDB)"""
-        """elif matches[0].lower() == 'find':
-            handleSearches(matches, dynamicDB, True)"""
+        elif matches[0].lower() == 'search':
+            Search.handleSearches(matches, dynamicDB)
+        elif matches[0].lower() == 'find':
+            Search.handleSearches(matches, dynamicDB, True)
         return changesMade
 
     def reset(self):

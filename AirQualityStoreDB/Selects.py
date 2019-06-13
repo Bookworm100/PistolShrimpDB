@@ -84,39 +84,15 @@ def handleSelects(matches, dynamicDB):
         matches = matches[2:]
         listOfKeys = []
 
-        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'and')) if k))
+        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'or')) if k))
         for i in range(0, len((compList))):
-            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'or')) if k))
+            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
             compList[i] = item
         listOfKeys += Main.findMatchingKeys('', compList, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
-    elif matches[2] in "+-*/":
-        ops = {"+": operator.add, "-": operator.sub, "*": operator.mul, "/": operator.truediv}
-        result = 0
-        start = 0
-        while True:
-            copy = {'data': dynamicDB}
-            some_str = "data.." + matches[1]
-            # print(some_str)
-            expr = parse(some_str)
-            vals = set()
-            for match in expr.find(copy):
-                vals.add(str(match.value))
-            toWrite += str(vals)
-            new_input = 'trivials.txt'
-
-            print(matches[start + 1])
-            if matches[start + 1] is None:
-                continue
-            if matches[start + 1].isdigit():
-                print("true")
-                result = ops[matches[start + 2]](result, int(matches[start + 3]))
-            else:
-                print("One of your selected colums is not a digit.")
-                break
     else:
         error = True
     if toWrite != '':
