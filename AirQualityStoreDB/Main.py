@@ -15,6 +15,7 @@ from InputFile import inputFile
 from Insert import Insert
 from Delete import Delete
 from Update import Update
+import OutputFile
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1182,8 +1183,6 @@ class pistolShrimpStore:
         self.replacedRows.clear()
         self.renamedColumns.clear()
 
-    def saveChanges(self):
-        print("To be implemented")
 
     def invokeUndo(self):
         for each in self.insertedRows:
@@ -1207,9 +1206,9 @@ class pistolShrimpStore:
               len(self.updatedRows), " updates!", "\n")
 
     def invokeSave(self):
-        self.saveChanges()
-        #saveChanges(isNewDBFile, storageDBFile, dynamicDB,
-        #            deletedKeys, insertedRows, updatedRows)
+        OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
+                               self.deletedKeys, self.insertedRows, self.updatedRows,
+                               self.maximumPosition)
         for each in self.deletedKeys:
             del self.dynamicDB[each]
         print("Successfully saved ", len(self.insertedRows), " insertions, "
@@ -1306,9 +1305,9 @@ class pistolShrimpStore:
                                       self.dynamicDB[key]['data'], "\n")
 
         if toSave:
-            print("Hooray!")
-            #saveChanges(isNewDBFile, storageDBFile, dynamicDB,
-            #          deletedKeys, insertedRows, updatedRows)
+            OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
+                      self.deletedKeys, self.insertedRows, self.updatedRows,
+                      self.maximumPosition)
 
 
 
