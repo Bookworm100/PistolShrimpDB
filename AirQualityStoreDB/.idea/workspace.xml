@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/InputFile.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Insert.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/InputFile.py" beforeDir="false" afterPath="$PROJECT_DIR$/InputFile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -56,22 +57,22 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="277" />
-          <entry key="py" value="37950" />
+          <entry key="py" value="39842" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="38227" />
+          <entry key="Python" value="40119" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="3" />
+          <entry key="py" value="5" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="3" />
+          <entry key="Python" value="5" />
         </counts>
       </usages-collector>
     </session>
@@ -81,28 +82,44 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="346">
-              <caret line="1101" column="55" lean-forward="true" selection-start-line="1101" selection-start-column="55" selection-end-line="1101" selection-end-column="55" />
+            <state relative-caret-position="165">
+              <caret line="1141" column="24" selection-start-line="1141" selection-start-column="24" selection-end-line="1141" selection-end-column="24" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1560393135326" expanded="true" signature="51826:53152" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="54121:54363" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="54390:54431" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="54426:54427" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="54452:54918" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="54966:55360" ph="..." />
+                <marker date="1560420195696" expanded="true" signature="57202:58528" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Insert.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="648">
+              <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+                <marker date="1560417904976" expanded="true" signature="100:101" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/InputFile.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="321">
-              <caret line="36" column="24" selection-start-line="36" selection-start-column="24" selection-end-line="36" selection-end-column="24" />
+            <state relative-caret-position="3417">
+              <caret line="201" column="79" selection-start-line="201" selection-start-column="71" selection-end-line="201" selection-end-column="79" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1560393682064" expanded="true" signature="2987:4537" ph="..." />
-                <marker date="1560393682064" expanded="true" signature="4532:4533" ph="..." />
               </folding>
             </state>
           </provider>
@@ -119,7 +136,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>and tags</find>
       <find>3.7</find>
       <find>3.6</find>
       <find>positionsDeleted</find>
@@ -146,9 +162,10 @@
       <find>setupdatabase</find>
       <find>ast</find>
       <find>null</find>
-      <find>print</find>
       <find>max</find>
+      <find>typesset</find>
       <find>handleselects</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -157,14 +174,15 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/Main.py" />
         <option value="$PROJECT_DIR$/InputFile.py" />
+        <option value="$PROJECT_DIR$/Insert.py" />
+        <option value="$PROJECT_DIR$/Main.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="2415" />
-    <option name="width" value="1438" />
+    <option name="x" value="-15" />
+    <option name="width" value="1948" />
     <option name="height" value="2075" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -253,10 +271,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="966" y="0" width="575" height="830" extended-state="0" />
+    <frame x="-6" y="0" width="779" height="830" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.08510638" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2815534" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" weight="0.32997987" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -288,25 +306,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
+    <entry file="file://$PROJECT_DIR$/InputFile.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="1101" column="55" lean-forward="true" selection-start-line="1101" selection-start-column="55" selection-end-line="1101" selection-end-column="55" />
+        <state relative-caret-position="3417">
+          <caret line="201" column="79" selection-start-line="201" selection-start-column="71" selection-end-line="201" selection-end-column="79" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
-            <marker date="1560393135326" expanded="true" signature="51826:53152" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/InputFile.py">
+    <entry file="file://$PROJECT_DIR$/Insert.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="321">
-          <caret line="36" column="24" selection-start-line="36" selection-start-column="24" selection-end-line="36" selection-end-column="24" />
+        <state relative-caret-position="648">
+          <caret line="99" column="31" selection-start-line="99" selection-start-column="31" selection-end-line="99" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+            <marker date="1560417904976" expanded="true" signature="100:101" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="1141" column="24" selection-start-line="1141" selection-start-column="24" selection-end-line="1141" selection-end-column="24" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
-            <marker date="1560393682064" expanded="true" signature="2987:4537" ph="..." />
-            <marker date="1560393682064" expanded="true" signature="4532:4533" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="54121:54363" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="54390:54431" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="54426:54427" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="54452:54918" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="54966:55360" ph="..." />
+            <marker date="1560420195696" expanded="true" signature="57202:58528" ph="..." />
           </folding>
         </state>
       </provider>

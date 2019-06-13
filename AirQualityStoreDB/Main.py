@@ -12,6 +12,7 @@ from itertools import groupby
 from jsonpath_ng import jsonpath, parse
 import operator
 from InputFile import inputFile
+from Insert import Insert
 
 # # Note: all global variables will not be modified
 # # size of blocks of memory in bytes
@@ -1042,6 +1043,139 @@ from InputFile import inputFile
 #         updateFileWithDeletes(storageDBFile, indicesToDelete)
 #     if len(insertedRows) > 0:
 #         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+class pistolShrimpStore:
+
+    def __init__(self, storageFile, dynamicDB, isNewDBFile, maximumPosition,
+                 typesSet):
+        #self.filename = name
+        self.dynamicDB = dynamicDB
+        self.storageFile = storageFile
+        self.insertedRows = {}
+        self.deletedKeys = []
+        self.updatedRows = {}
+        self.replacedRows = {}
+        self.renamedColumns = []
+        self.maximumPosition = 0
+        self.isNewDBFile = isNewDBFile
+        self.maximumPosition = maximumPosition
+        self.typesSet = set(typesSet)
+
+    """ handleInput will be used to execute commands to change the key value """
+    """ store. This will soon handle insertions, deletions, select statements, """
+    """ update statements, and search statements. Insert commands will return """
+    """ the new rows, Delete statements will simply change the tag values  """
+    """ and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
+    """ while also returning nothing."""
+    """ @param: command, the raw command passed in by the user """
+    """ @param: dynamicDB, the key value store running in the program """
+    """ @return: insertedRows, deletedKeys, updateResults: a tuple of """
+    """          a list of inserted rows, a list of keys just deleted, """
+    """          and a tuple of rows that were inserted and their corresponding """
+    """          rows that were replaced. """
+
+    def handleInput(self, command):
+        # check the inputs
+        # TODO: Change command to lowercase, pass in removed command
+        parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'"]+', re.IGNORECASE)
+        matches = parser.findall(command)
+        changesMade = None
+        if matches[0].lower() == 'insert':
+            changesMade = Insert(matches, self.typesSet)
+            #insertedRows = handleInserts(matches, dynamicDB)
+        """elif matches[0].lower() == 'delete':
+            deletedKeys = handleDeletes(matches, dynamicDB)
+        elif matches[0].lower() == 'select':
+            handleSelects(matches, dynamicDB)
+        elif matches[0].lower() == 'search':
+            handleSearches(matches, dynamicDB)
+        elif matches[0].lower() == 'update':
+            updateResults = handleUpdates(matches, dynamicDB)
+        elif matches[0].lower() == 'find':
+            handleSearches(matches, dynamicDB, True)"""
+        return changesMade
+
+    def reset(self):
+        # The applicable changes have been saved to the
+        # storage file, so we no longer need them.
+        self.insertedRows.clear()
+        self.deletedKeys.clear()
+        self.updatedRows.clear()
+        self.replacedRows.clear()
+
+    def saveChanges(self):
+        print("To be implemented")
+
+    def invokeUndo(self):
+        for each in self.insertedRows:
+            del self.dynamicDB[each]
+
+        for each in self.deletedKeys:
+            self.dynamicDB[each]['isFree'] = 'false'
+
+        for each in self.replacedRows:
+            self.dynamicDB[each] = self.replacedRows[each]
+
+        print("Successfully undoed ", len(self.insertedRows),
+              " insertions, ", len(self.deletedKeys), " deletions, and ",
+              len(self.updatedRows), " updates!", "\n")
+
+    def invokeSave(self):
+        self.saveChanges()
+        #saveChanges(isNewDBFile, storageDBFile, dynamicDB,
+        #            deletedKeys, insertedRows, updatedRows)
+        for each in self.deletedKeys:
+            del self.dynamicDB[each]
+        print("Successfully saved ", len(self.insertedRows), " insertions, "
+              , len(self.deletedKeys), " deletions, and ",
+              len(self.updatedRows), " updates!", "\n")
+
+    def run(self):
+        # This section handles user input and passes it to
+        # the handleInput function to change the key value
+        # store.
+        toSave = True
+        while True:
+            n = input("Now we can do awesome stuff! You can exit the program "
+                      "with exit or quit if you"
+                      " want your changes saved, or with abort if you don't. "
+                      "You can also save your changes with save and undo"
+                      " them with undo! \n")
+
+            if n == "quit" or n == "abort" or n == "exit":
+                if n == "abort":
+                    toSave = False
+                break
+
+            # save and undo go here
+            if n == "save":
+                self.invokeSave()
+                self.reset()
+                continue
+            elif n == "undo":
+                # Do stuff
+                self.invokeUndo()
+                self.reset()
+                continue
+            else:
+                handleValue = self.handleInput(n)
+
+                # check the class
+                if handleValue is not None:
+                    if type(handleValue) == Insert:
+                        newRow = handleValue.handleInserts(self.dynamicDB)
+                        self.insertedRows.update(newRow)
+                        self.dynamicDB.update(newRow)
+                        for key in newRow:
+                            print("Successfully inserted ", key, ": ",
+                                  newRow[key]['data'], "\n")
+        if toSave:
+            print("Hooray!")
+            #saveChanges(isNewDBFile, storageDBFile, dynamicDB,
+            #          deletedKeys, insertedRows, updatedRows)
+
+
+
+
 
 """Here: the filename is specified, as is the column types to search for, """
 """ and where to find the data. """
@@ -1101,12 +1235,19 @@ if __name__ == "__main__":
 
     dynamicDB, isNewDBFile, maximumPosition, typesSet \
         = inputFileInstance.loadFile()
-    #debug statement
-    #print(dynamicDB['row-t6cq_74d7-addj'])
-    #print(dynamicDB['row-mwd5.kak3~ncwp'])
-    #print(isNewDBFile)
-    #print(maximumPosition)
 
+    DBFile = input("If you would like to specify "
+                   "a file to write to, type it here else, hit enter."
+                   "\n")
+    if len(DBFile) == 0:
+        DBFile = 'PistolStorageDB.bin'
+
+    pSStore = pistolShrimpStore(DBFile, dynamicDB, isNewDBFile, maximumPosition,
+                                typesSet)
+
+    pSStore.run()
+
+    print("Goodbye! Hope to see you again soon!")
 
     # dynamicDB = {}
     # defaultFile = 'CityData.json'

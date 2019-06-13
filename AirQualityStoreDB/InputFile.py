@@ -14,6 +14,7 @@ class inputFile:
         self.maximumPosition = 0
         self.whereKey = whereKey
         self.whereData = whereData
+        self.typesSet = []
         self.name, self.type = os.path.splitext(name)
 
     """ If the places to find the data is specified, all that's required is to see if """
@@ -22,7 +23,6 @@ class inputFile:
     """ viable candidate by searching for the largest element in the dictionary """
     """ or list. """
     def findTheData(self, measurements):
-        typesSet = []
         data = None
         if self.whereData in measurements or self.whereData != 'data':
             if self.whereData in measurements:
@@ -52,11 +52,11 @@ class inputFile:
             while type(data) == dict and len(data) == 1:
                 data = data[list(data.keys())[0]]
             if type(data) == dict:
-                typesSet = list(data.keys())
+                self.typesSet = list(data.keys())
                 data = list(data.values())
             elif type(data) != list:
                 data = [data]
-        return data, typesSet
+        return data
 
     """ 1. Find the whereKey in the measurements, which should give us a list of columns if possible """
     """ 2. Fine where the data is: """
@@ -76,7 +76,7 @@ class inputFile:
                 break
 
         # Find where the data is if not specified (or incorrectly specified)
-        data, typesSet = self.findTheData(measurements)
+        data = self.findTheData(measurements)
 
         # There should be at least some data, and the file should not
         # be empty.
@@ -90,14 +90,14 @@ class inputFile:
         if len(jsonMatches) > 0:
             vals = [match.value for match in jsonpathExpr.find(measurements)]
             originalLength = len(vals)
-            typesSet = [val['name'].lower() for val in vals[0] if 'id' not in val or val['id'] != -1]
+            self.typesSet = [val['name'].lower() for val in vals[0] if 'id' not in val or val['id'] != -1]
             skipItems = originalLength - len(vals) - 1
         # If they were not found, we set default values that can be renamed
-        elif len(typesSet) == 0:
+        elif len(self.typesSet) == 0:
             maxVal = max(data, key=len)
-            typesSet = ["column" + str(i) for i in range(len(maxVal))]
+            self.typesSet = ["column" + str(i) for i in range(len(maxVal))]
 
-        return data, typesSet, skipItems
+        return data, skipItems
 
 
     """ setUpDatabase2 initilizes the key value store from an existing JSON """
@@ -126,7 +126,7 @@ class inputFile:
         assert measurementsJSON.closed
 
         # Retrieve column values, which by default is "column1", "column2", etc
-        data, typesSet, skipItems = self.retrieveColumnsData(measurements)
+        data, skipItems = self.retrieveColumnsData(measurements)
 
         # Set up the key value store dictionary, which is
         # written to the file at a later point.
@@ -136,7 +136,7 @@ class inputFile:
             # Free or not? 0 indicates not free, 1 indicates free
             items = dict(isFree='false', position=positionCounter)
             values = dict()
-            for itm, type1 in zip(range(skipItems, len(typesSet) + skipItems), typesSet):
+            for itm, type1 in zip(range(skipItems, len(self.typesSet) + skipItems), self.typesSet):
                 values[type1] = measurement[itm]
             items['data'] = values
             measurementStore[measurement[0]] = items
