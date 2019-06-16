@@ -28,8 +28,9 @@ class inputFile:
             if self.whereData in measurements:
                 data = measurements[self.whereData]
             else:
+                # If the data is hidden somewhere in the structure
                 for elem in measurements:
-                    jsonpathExpr = parse(elem + self.whereData)
+                    jsonpathExpr = parse(elem + '..' + self.whereData)
                     jsonMatches = jsonpathExpr.find(measurements)
                     if len(jsonMatches) != 0:
                         data = jsonMatches
@@ -66,10 +67,12 @@ class inputFile:
     def retrieveColumnsData(self, measurements):
         # Search for the list of columns using jsonpath_ng's parse
         skipItems = 0
+
         jsonpathExpr = parse('meta..' + self.whereKey)
         jsonMatches = []
         for elem in measurements:
             jsonMatches = jsonpathExpr.find(measurements)
+
             if len(jsonMatches) == 0:
                 jsonpathExpr = parse(elem + '..' + self.whereKey)
             else:
@@ -81,7 +84,8 @@ class inputFile:
         # There should be at least some data, and the file should not
         # be empty.
         if data is None or len(data) == 0:
-            raise Exception("Something went wrong with the loading of the data. Please try again.")
+            raise Exception("Something went wrong with the loading of the data. "
+                            "Please try again, and check your file for any anomalies.")
 
         # If the columns were found, we set them to be uniformly lowercase
         # and we process them to help us load the data to make
@@ -89,9 +93,10 @@ class inputFile:
         # metadata that interferes with the program.
         if len(jsonMatches) > 0:
             vals = [match.value for match in jsonpathExpr.find(measurements)]
-            originalLength = len(vals)
-            self.typesSet = [val['name'].lower() for val in vals[0] if 'id' not in val or val['id'] != -1]
-            skipItems = originalLength - len(vals) - 1
+            originalItems = [val['name'].lower() for val in vals[0]]
+            self.typesSet = [val['name'].lower() for val in vals[0]
+                             if 'id' not in val or val['id'] != -1]
+            skipItems = len(originalItems) - len(self.typesSet)
         # If they were not found, we set default values that can be renamed
         elif len(self.typesSet) == 0:
             maxVal = max(data, key=len)
@@ -168,25 +173,29 @@ class inputFile:
     """         with each inserted row """
 
     def loadFile(self):
+        # Note: os path for the file we use must always exist as this is
+        # always called after
+        # handleFileInput
         dynamicDB = {}
         # Load from a preexisting storage file.
         if self.type == '.bin':
             # Read from the file, line by line (row by row).
-            with open(self.filename, 'rb') as file:
-                rows = [line.strip().decode('utf-8').replace('\0', '') for line
-                        in file if line.strip()]
-            # Load each row to the store maintained in the program.
-            # ast cannot read null characters, so we have to replace them
-            for row in rows:
-                if 'null' in row:
-                    row = row.replace('null', "None")
-                dynamicDB.update(ast.literal_eval(row))
-            # Update maximum position, which is helpful to
-            # note when adding, removing, and updating
-            # rows.
-            lastKey = ast.literal_eval(rows[-1])
-            for key in lastKey.keys():
-                self.maximumPosition = lastKey[key]['position']
+            if os.path.isfile(self.filename):
+                with open(self.filename, 'rb') as file:
+                    rows = [line.strip().decode('utf-8').replace('\0', '') for line
+                            in file if line.strip()]
+                # Load each row to the store maintained in the program.
+                # ast cannot read null characters, so we have to replace them
+                for row in rows:
+                    if 'null' in row:
+                        row = row.replace('null', "None")
+                    dynamicDB.update(ast.literal_eval(row))
+                # Update maximum position, which is helpful to
+                # note when adding, removing, and updating
+                # rows.
+                lastKey = ast.literal_eval(rows[-1])
+                for key in lastKey.keys():
+                    self.maximumPosition = lastKey[key]['position']
         # Load from a JSON file
         elif self.type == '.json':
             # We are creating a new file.

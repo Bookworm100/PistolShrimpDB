@@ -1,4 +1,3 @@
-import Main
 import json
 import sys
 
@@ -33,6 +32,8 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
     if isNewDBFile:
         with open(storageDBFile, 'wb') as file:
             for item in dynamicDB:
+                if 'position' not in dynamicDB[item]:
+                    continue
                 toWrite = '{' + json.dumps(item) + ': ' + \
                               json.dumps(dynamicDB[item]) + '}' + '\n'
                 toByte = toWrite.encode('utf-8')
@@ -40,6 +41,7 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
                                .encode('utf-8'))
                 file.write(toByte)
                 c += 1
+        maximumPosition = c - 1
 
     keyList = list(dynamicDB.keys())
     indicesToDelete = []
@@ -66,7 +68,8 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
     if len(indicesToDelete) > 0:
         updateFileWithDeletes(storageDBFile, indicesToDelete)
     if len(insertedRows) > 0:
-        updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+        maximumPosition = updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
+    return maximumPosition
 
 """ updateFileWithUpdates modifies the  """
 """ value store from the storage file. As Python 3.6+ preserves order """
@@ -156,3 +159,4 @@ def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
             file1.write(('\0'*(blockSize-sys.getsizeof(toByte1)))
                         .encode('utf-8'))
             file1.write(toByte1)
+    return maximumPosition

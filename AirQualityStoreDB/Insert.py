@@ -2,6 +2,7 @@ import random
 import string
 import re
 import ast
+import SharedFunctions
 
 class Insert:
     #def super(Insert, self).super()
@@ -46,8 +47,10 @@ class Insert:
         for i in range(0, len(colValList), 2):
             if colValList[i] not in self.typesSet:
                 self.typesSet.add(colValList[i])
-
-            newValues[colValList[i]] = ast.literal_eval(str(colValList[i + 1]))
+            if type(colValList[i + 1]) != str:
+                newValues[colValList[i]] = ast.literal_eval(str(colValList[i + 1]))
+            else:
+                newValues[colValList[i]] = str(colValList[i + 1])
 
         return newValues
 
@@ -66,6 +69,7 @@ class Insert:
     def handleInserts(self, dynamicDB):
         key = ''
         values = {}
+        equalMatches = self.matches
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
         matches = parser.findall(" ".join(self.matches))
         # This is if the user inputs in the format
@@ -79,14 +83,14 @@ class Insert:
                       "key instead...\n")
                 while key in dynamicDB:
                     key = self.generateRandomKey()
-            matches = matches[4:]
+            matches = SharedFunctions.spaceMatches(4, equalMatches)
             # This function parses the matches and generates new rows in the
             # proper format.
             values = self.generateNewRows(matches)
         # This is if the user inputs in the format
         # INSERT VALUES (col=tag, col2=tag2, col3=tag3…)
         elif matches[1].lower() == 'values' and len(matches) >= 3:
-            matches = matches[2:]
+            matches = SharedFunctions.spaceMatches(2, equalMatches)
             while key in dynamicDB or key == '':
                 key = self.generateRandomKey()
             values = self.generateNewRows(matches)

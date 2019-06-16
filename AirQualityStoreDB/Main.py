@@ -1048,146 +1048,6 @@ import Search
 #         updateFileWithDeletes(storageDBFile, indicesToDelete)
 #     if len(insertedRows) > 0:
 #         updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
-""" This handles the printing of selects to a file or output. """
-""" First, the user is prompted to indicate whether to print the """
-""" output to terminal. Next, if the output is large, and the user """
-""" indicates that they would like the output to be printed to the """
-""" terminal, the user is notified, and is prompted whether they want to """
-""" proceed with printing to terminal. In the case that they want to """
-""" print to file, the user is prompted to indicate if they would like """
-""" to specify a file to store the output. If not, the given default """
-""" filename is used. If so, then the program attempts to open or create """
-""" the file, and if an error is thrown in case the file cannot be created, """
-""" then, the user is prompted to indicate if they would like to specify a """
-""" file to store the output. This repeats until the user types in N, or """
-""" if they specify a valid file path. In any case the user is prompted to """
-""" type Y or N and they do not, they are prompted again to type Y or N. """
-""" @:param: default_file, the file that results will be written to if no """
-"""          file is specified by the user"""
-""" @:param: toWrite, the string that will be written to the file """
-""" @:return: None """
-def printSelectsSearches(default_file, toWrite):
-    written = False
-    # Does the user want to print output to the terminal?
-    n = input("Would you like to print the output to the terminal?"
-              " Type Y or N only. \n")
-    # In case of invalid output
-    while n.lower() != "y" and n.lower() != "n":
-        n = input("Sorry, we did not quite understand. Please type "
-                  "Y only if you want to print to output or N"
-                  "if you don't and want to print to a file.\n")
-    # The user must confirm if the size of the output
-    # is big.
-    if n.lower() == "y" and sys.getsizeof(toWrite) > 2000:
-        n = input("The size of the output is pretty big. "
-                  "Are you sure? Again, type Y or N.\n ")
-        while n.lower() != "y" and n.lower() != "n":
-            n = input("Sorry, we did not quite understand. Please type "
-                      "Y only if you want to print to output or N"
-                      "if you don't and want to print to a file,"
-                      "given that the file size is big.\n")
-    # Print to terminal here.
-    if n.lower() == "y":
-        print(toWrite)
-    else:
-        # The user is prompted to indicate if they want to use a custom file.
-        n = input("Would you like to create a custom file with the output?"
-                  " Type Y or N only. \n")
-        # TODO n = n.lower()
-        while not written:
-            try:
-                new_input = default_file
-                # If the input is invalid
-                while n.lower() != "y" and n.lower() != "n":
-                    n = input("Sorry, we did not quite understand. Please type"
-                          " Y only if you want to create a custom file or N"
-                        "if you don't and want to use our custom file.\n")
-                # The user types in the desired file path.
-                if n.lower() == "y":
-                    new_input = input("Please type in the file name, which can"
-                                  " include the path if it's not being stored"
-                                  " in the location of this program:\n")
-                # The file is opened or created for writing.
-                with open(new_input, 'w') as file:
-                    file.write(toWrite)
-                    written = True
-            except IOError:
-                # In the case the file cannot be created, the user is
-                # asked if they changed their mind and want to use the
-                # default file instead.
-                n = input("Sorry, this path seems to be invalid."
-                              " Would you still like to create a custom file? "
-                              " Again, type Y or N.\n")
-
-
-
-""" findMatchingKeys removes the values or values assicated with the key """
-""" from the dictionary holding the database, and keep track of what might """
-""" be removed from the storage file upon exiting or quitting. """
-""" @:param: key, an argument which when provided is returned """
-""" @:param: values, the list of values """
-""" @:param: dynamicDB, the key value store maintained in the program """
-""" @:return: selectedKeys, the list of keys to be displayed or deleted """
-"""           from the store """
-def findMatchingKeys(key, values, dynamicDB):
-    selectedKeys = []
-    # If the key-value to delete is simply
-    # identifiable by a key, we simply
-    # mark that key for deletion.
-    if len(values) == 1:
-        selectedKeys.append(key)
-    else:
-        # Since identification was only specified by
-        # rows, we need to filter the rows by each column specified
-        # and mark these keys for deletion.
-        filterItems = dynamicDB
-        # Check that all tags/columns are matched correctly
-        if len(values) % 2 == 1:
-            print("Column types must be associated with column values!")
-            return []
-
-        selected = {}
-        for item1 in filterItems:
-            include = True
-            newVal = {}
-            for colIndex in range(0, len(values), 2):
-                col = values[colIndex]
-                val = values[colIndex + 1]
-                if col in filterItems[item1]['data'] \
-                        and filterItems[item1]['isFree'] == 'false':
-                    if filterItems[item1]['data'][col] != val:
-                        include = False
-                else:
-                    include = False
-            if include == True:
-                newVal[item1] = filterItems[item1]
-                selected.update(newVal)
-        if len(selected) == 0:
-            print("Sorry, nothing in the store matches! Check your input or "
-                  "column types.")
-            return []
-        for item in selected:
-            selectedKeys.append(item)
-
-        """for colIndex in range(0, len(values), 2):
-            col = values[colIndex]
-            val = values[colIndex + 1]
-            selected = {}
-            for item1 in filterItems:
-                if col in filterItems[item1]['data'] \
-                        and filterItems[item1]['isFree'] == 'false':
-                    if filterItems[item1]['data'][col] == val:
-                        newVal = {}
-                        newVal[item1] = filterItems[item1]
-                        selected.update(newVal)
-            filterItems = selected
-        if len(filterItems) == 0:
-            print("Sorry, nothing in the store matches! Check your input or "
-                  "column types.")
-            return []
-        for item in filterItems:
-            selectedKeys.append(item)"""
-    return selectedKeys
 
 
 class renamed:
@@ -1228,7 +1088,7 @@ class pistolShrimpStore:
     def handleInput(self, command):
         # check the inputs
         # TODO: Change command to lowercase, pass in removed command
-        parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'"]+', re.IGNORECASE)
+        parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'",]+', re.IGNORECASE)
         matches = parser.findall(command)
         changesMade = None
         if matches[0].lower() == 'insert':
@@ -1237,15 +1097,15 @@ class pistolShrimpStore:
         elif matches[0].lower() == 'rename':
             changesMade = renamed(matches[1].lower(), matches[2].lower())
         elif matches[0].lower() == 'delete':
-            changesMade = Delete(matches, typesSet)
+            changesMade = Delete(matches, self.typesSet)
         elif matches[0].lower() == 'update':
-            changesMade = Update(matches, typesSet)
+            changesMade = Update(matches, self.typesSet)
         elif matches[0].lower() == 'select':
-            Selects.handleSelects(matches, dynamicDB)
+            Selects.handleSelects(matches, self.dynamicDB)
         elif matches[0].lower() == 'search':
-            Search.handleSearches(matches, dynamicDB)
+            Search.handleSearches(matches, self.dynamicDB)
         elif matches[0].lower() == 'find':
-            Search.handleSearches(matches, dynamicDB, True)
+            Search.handleSearches(matches, self.dynamicDB, True)
         return changesMade
 
     def reset(self):
@@ -1268,19 +1128,19 @@ class pistolShrimpStore:
         for each in self.replacedRows:
             self.dynamicDB[each] = self.replacedRows[each]
 
-        for each in dynamicDB:
+        for each in self.dynamicDB:
             for tup in self.renamedColumns:
                 col2, col1 = tup
-                reassigned = dynamicDB[each]['data'][col1]
-                del dynamicDB[each]['data'][col1]
-                dynamicDB[each]['data'][col2] = reassigned
+                reassigned = self.dynamicDB[each]['data'][col1]
+                del self.dynamicDB[each]['data'][col1]
+                self.dynamicDB[each]['data'][col2] = reassigned
 
         print("Successfully undoed ", len(self.insertedRows),
               " insertions, ", len(self.deletedKeys), " deletions, and ",
               len(self.updatedRows), " updates!", "\n")
 
     def invokeSave(self):
-        OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
+        self.maximumPosition = OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
                                self.deletedKeys, self.insertedRows, self.updatedRows,
                                self.maximumPosition)
         for each in self.deletedKeys:
@@ -1293,13 +1153,21 @@ class pistolShrimpStore:
         col1 = handleValue.original
         col2 = handleValue.new
         tup = (col1, col2)
-        for each in dynamicDB:
-            if col1 in dynamicDB[each]['data']:
-                reassigned = dynamicDB[each]['data'][col1]
-                del dynamicDB[each]['data'][col1]
-                dynamicDB[each]['data'][col2] = reassigned
-        self.renamedColumns.append(tup)
-        print("Successfully renamed ", col1, " as ", col2,"!")
+        counter = 0
+        for each in self.dynamicDB:
+            if col1 in self.dynamicDB[each]['data']:
+                counter += 1
+                reassigned = self.dynamicDB[each]['data'][col1]
+                del self.dynamicDB[each]['data'][col1]
+                self.dynamicDB[each]['data'][col2] = reassigned
+        if counter == 0:
+            print("The first column you specified does not exist! Please "
+                  "note the syntax is RENAME col1 col2, where col1 is the"
+                  "original column and col2 is the column name that is what"
+                  " you want col1 to be replaced with.")
+        else:
+            self.renamedColumns.append(tup)
+            print("Successfully renamed ", col1, " as ", col2,"!")
 
     def run(self):
         # This section handles user input and passes it to
@@ -1317,11 +1185,13 @@ class pistolShrimpStore:
                 if n == "abort":
                     toSave = False
                 break
-
+            if len(n) == 0:
+                continue
             # save and undo go here
             if n == "save":
                 self.invokeSave()
                 self.reset()
+                self.isNewDBFile = False
                 continue
             elif n == "undo":
                 # Do stuff
@@ -1345,10 +1215,10 @@ class pistolShrimpStore:
                     elif type(handleValue) == Delete:
                         row = handleValue.handleDeletes(self.dynamicDB)
                         for item in row:
-                            dynamicDB[item]['isFree'] = 'true'
+                            self.dynamicDB[item]['isFree'] = 'true'
                             # This is in the storage file, so
                             # we should erase them.
-                            if 'position' in dynamicDB[item]:
+                            if 'position' in self.dynamicDB[item]:
                                 self.deletedKeys.append(item)
                             else:
                                 # This was a new row, so we do not
@@ -1393,8 +1263,8 @@ def handleFileInput():
     # Let the user specify which file to use
     toLoadFile = input("Welcome to PistolShrimpDB! If you would like to specify "
                        "a file to load from, type it here else, hit enter."
-                       "If our default storage file does not exist yet,  "
-                       " you must specify the file."
+                       " If our default storage file does not exist yet,  "
+                       "you must specify the file."
                        "\n")
 
     print("Loading...\n")
@@ -1420,7 +1290,7 @@ def handleFileInput():
         whereKey = "columns"
     if len(whereData) == 0:
         whereData = "data"
-    return toLoadFile, whereData, whereKey
+    return toLoadFile, whereKey, whereData
 
 
 """ The main function checks if a file exists that contains the key value """
@@ -1443,7 +1313,7 @@ if __name__ == "__main__":
     # Create new file instance
     inputFileInstance = inputFile(*handleFileInput())
 
-    dynamicDB, isNewDBFile, maximumPosition, typesSet \
+    initialDB, toCreateDBFile, maxPosition, setOfTypes \
         = inputFileInstance.loadFile()
 
     DBFile = input("If you would like to specify "
@@ -1452,8 +1322,8 @@ if __name__ == "__main__":
     if len(DBFile) == 0:
         DBFile = 'PistolStorageDB.bin'
 
-    pSStore = pistolShrimpStore(DBFile, dynamicDB, isNewDBFile, maximumPosition,
-                                typesSet)
+    pSStore = pistolShrimpStore(DBFile, initialDB, toCreateDBFile, maxPosition,
+                                setOfTypes)
 
     pSStore.run()
 

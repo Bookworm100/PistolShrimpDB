@@ -1,6 +1,7 @@
 import re
 import json
 import ast
+import SharedFunctions
 
 class Update:
     #def super(Insert, self).super()
@@ -36,7 +37,7 @@ class Update:
             if key in dynamicDB and dynamicDB[key]['isFree'] == 'false':
                 allVals = dynamicDB[key]['data']
                 replaced = json.dumps(dynamicDB[key]['data'])
-                matches = matches[4:]
+                matches = SharedFunctions.spaceMatches(4, self.matches)
                 # Check that all types/columns are matched correctly
                 if len(matches) % 2 == 1:
                     print("Column types must be associated with column values!"
@@ -47,18 +48,18 @@ class Update:
                 # this is an invalid input.
                 if not error:
                     for colIndex in range(0, len(matches), 2):
-                        if matches[colIndex] in allVals or \
-                                matches[colIndex] in self.typesSet:
-                            allVals[matches[colIndex]] = matches[colIndex + 1]
-                        else:
-                            print(matches[colIndex], " is an invalid column type! \n "
-                                  , usage)
-                            error = True
+                        if matches[colIndex] not in self.typesSet:
+                            self.typesSet.add(matches[colIndex])
+                        allVals[matches[colIndex]] = matches[colIndex + 1]
+
+                        #else:
+                        #    print(matches[colIndex], " is an invalid column type! \n "
+                        #          , usage)
+                        #    error = True
                     # Now set the data of the row to be the modified values.
-                    if not error:
-                        dynamicDB[key]['data'] = allVals
-                        self.updatedRow = {key: {'isFree': 'false', 'data': allVals}},
-                        self.replacedRow = {key: {'isFree': 'false', 'data':
+                    dynamicDB[key]['data'] = allVals
+                    self.updatedRow = {key: {'isFree': 'false', 'data': allVals}}
+                    self.replacedRow = {key: {'isFree': 'false', 'data':
                                          ast.literal_eval(replaced)}}
             else:
                 print("The key is not in the store!")

@@ -1,7 +1,7 @@
 import difflib
 from itertools import groupby
 import AndsandOrs
-import Main
+import SharedFunctions
 
 
 
@@ -58,30 +58,51 @@ def handleSearches(matches, dynamicDB, isFind=False):
             error = True
         # If columns are called with patterns, then we separate the matches
         # out to their corresponding lists to be called in printSearchResult.
+        if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+            matches = SharedFunctions.conjMatches(0, matches)
+            toWrite += AndsandOrs.processAndandOrs(False, True, matches, usage, dynamicDB, isFind, limit)
+            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+        else:
+            matches = SharedFunctions.spaceMatches(0, matches)
+            if len(matches) % 2 != 0:
+                print("Cols mus tbe associated with values!")
+                print(usage)
+                error = True
+            else:
+                cols = matches[0:len(matches):2]
+                patterns = matches[1:len(matches):2]
+                toWrite += AndsandOrs.processAndandOrs(False, True, [[matches]], usage, dynamicDB, True, isFind, limit)
+            #(findInKeys, findInVals, filterItems, cols, patterns, item1, toFind=False, limit=0.8)
+            #listOfKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)
 
-        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'or')) if k))
-        for i in range(0, len((compList))):
-            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
-            compList[i] = item
 
-        toWrite += AndsandOrs.processAndandOrs(False, True, compList, usage, isFind, limit)
     # Case 3 (we are looking through keys and values, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key" and matches[1].lower() == "and" and\
             matches[2].lower() == "values" or matches[0] == "*":
-        compList = list((list(g) for k, g in groupby(matches[3:], key=lambda x: (x.lower() != 'or')) if k))
-        for i in range(0, len((compList))):
-            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
-            compList[i] = item
-        toWrite += AndsandOrs.processAndandOrs(True, True, compList, usage, isFind, limit)
+        if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+            matches = SharedFunctions.conjMatches(3, matches)
+            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+        else:
+            matches = SharedFunctions.spaceMatches(3, matches)
+        #compList = list((list(g) for k, g in groupby(matches[3:], key=lambda x: (x.lower() != 'or')) if k))
+        #for i in range(0, len((compList))):
+        #    item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
+        #    compList[i] = item
+        toWrite += AndsandOrs.processAndandOrs(True, True, matches, usage, dynamicDB, isFind, limit)
     # Case 4 (we are looking through keys, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key":
-        compList = list((list(g) for k, g in groupby(matches[1:], key=lambda x: (x.lower() != 'or')) if k))
-        for i in range(0, len((compList))):
-            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
-            compList[i] = item
-        toWrite += AndsandOrs.processAndandOrs(True, False, compList, usage, isFind, limit)
+        #compList = list((list(g) for k, g in groupby(matches[1:], key=lambda x: (x.lower() != 'or')) if k))
+        #for i in range(0, len((compList))):
+        #    item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
+        #    compList[i] = item
+        if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+            matches = SharedFunctions.conjMatches(1, matches)
+            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+        else:
+            matches = SharedFunctions.spaceMatches(1, matches)
+        toWrite += AndsandOrs.processAndandOrs(True, False, matches, usage, dynamicDB, isFind, limit)
     else:
         if isFind:
             print("Invalid format! Either your key is not in the store,"
@@ -93,7 +114,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
                   "the usage is below: \n ", usage)
         error = True
     if not error and toWrite != '':
-        Main.printSelectsSearches("searchResult.txt", toWrite)
+        SharedFunctions.printSelectsSearches("searchResult.txt", toWrite)
 
 
 """ printSearchResult filters per pattern. For each pattern specified,"""

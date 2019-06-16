@@ -3,7 +3,8 @@ import json
 from itertools import groupby
 from jsonpath_ng import jsonpath, parse
 import operator
-import Main
+import SharedFunctions
+import AndsandOrs
 
 """ This should handle anything """
 """ with selects. Either completed or very, very close to completion. """
@@ -30,6 +31,7 @@ import Main
 """ @:param: dynamicDB, the key value store maintained in the program """
 """ @:return: None """
 def handleSelects(matches, dynamicDB):
+    equalMatches = matches
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
     matches = parser.findall(" ".join(matches))
     toWrite = ''
@@ -76,27 +78,27 @@ def handleSelects(matches, dynamicDB):
             vals = set()
             for match in expr.find(copy):
                 vals.add(str(match.value))
-            toWrite += str(vals)
+            toWrite += str(list(vals))
             new_input = 'trivials.txt'
             if toWrite == '':
                 print("The key or column key is not in the store!")
     elif matches[1].lower() == 'where' and len(matches) >= 4:
-        matches = matches[2:]
         listOfKeys = []
-
-        compList = list((list(g) for k, g in groupby(matches, key=lambda x: (x.lower() != 'or')) if k))
-        for i in range(0, len((compList))):
-            item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
-            compList[i] = item
-        listOfKeys += Main.findMatchingKeys('', compList, dynamicDB)
+        if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+            matches = SharedFunctions.conjMatches(2, equalMatches)
+            listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+        else:
+            matches = SharedFunctions.spaceMatches(2, equalMatches)
+            listOfKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
+
     else:
         error = True
     if toWrite != '':
-        Main.printSelectsSearches(new_input, toWrite)
+        SharedFunctions.printSelectsSearches(new_input, toWrite)
     if error:
         print("Either your format is invalid or something is "
               "not quite implemented! \n")
