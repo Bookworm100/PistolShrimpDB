@@ -21,7 +21,6 @@ def conjMatches(index, matches):
             parser[i][j] = par1.findall("".join(parser[i][j]))
     return parser
 
-
 """ This handles the printing of selects to a file or output. """
 """ First, the user is prompted to indicate whether to print the """
 """ output to terminal. Next, if the output is large, and the user """
@@ -174,7 +173,7 @@ for item in filterItems:
     selectedKeys.append(item)
 return selectedKeys"""
 
-def findMatchingKeys(key, values, dynamicDB):
+"""def findMatchingKeys(key, values, dynamicDB):
     selectedKeys = []
     print(values)
     # If the key-value to delete is simply
@@ -209,5 +208,50 @@ def findMatchingKeys(key, values, dynamicDB):
             return []
         for item in filterItems:
             selectedKeys.append(item)
-    return selectedKeys
+    return """
 
+def doesColumnTypeValueMatch(key, values, filterItems):
+    meetsAllAnds = True
+    if len(values) % 2 == 1:
+        print("Column types must be associated with column values!")
+        return []
+    # For each pair, compare their values with
+    # each item and if their corresponding column labels and
+    # values match, then we continue checking the rest
+    # of the pairs.
+    for colIndex in range(0, len(values), 2):
+        col = values[colIndex]
+        val = values[colIndex + 1]
+        keys = set(k.lower() for k in filterItems[key]['data'])
+        if col.lower() not in keys \
+                or filterItems[key]['isFree'] != 'false' \
+                or filterItems[key]['data'][col].lower() \
+                != val.lower():
+            meetsAllAnds = False
+            # Once we know each pair matches, we know to
+            # include them.
+    return meetsAllAnds
+
+
+def findMatchingKeys(key, values, dynamicDB):
+    selectedKeys = []
+    print(values)
+    # If the key-value to delete is simply
+    # identifiable by a key, we simply
+    # mark that key for deletion.
+    if len(values) == 1:
+        selectedKeys.append(key)
+    else:
+        # Since identification was only specified by
+        # rows, we need to filter the rows by each column specified
+        # and mark these keys for deletion.
+        filterItems = dynamicDB
+        for item1 in filterItems:
+        # Check that all tags/columns are matched correctly
+            meetsAllAnds = doesColumnTypeValueMatch(item1, values, filterItems)
+            if meetsAllAnds:
+                selectedKeys.append(item1)
+    if len(selectedKeys) == 0:
+        print("Sorry, nothing in the store matches! Check your input or "
+              "column types.")
+    return selectedKeys

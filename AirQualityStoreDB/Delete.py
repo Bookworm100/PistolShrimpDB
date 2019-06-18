@@ -28,7 +28,7 @@ class Delete:
         if matches[1].lower() == 'values' and len(matches) >= 3:
             if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
                 matches = SharedFunctions.conjMatches(2, self.matches)
-                self.selectedKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+                self.selectedKeys += AndsandOrs.selectKeyswithAndOrs(matches, dynamicDB)
             else:
                 matches = SharedFunctions.spaceMatches(2, self.matches)
                 self.selectedKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)

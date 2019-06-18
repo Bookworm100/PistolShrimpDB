@@ -86,7 +86,7 @@ def handleSelects(matches, dynamicDB):
         listOfKeys = []
         if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
             matches = SharedFunctions.conjMatches(2, equalMatches)
-            listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
+            listOfKeys += AndsandOrs.selectKeyswithAndOrs(matches, dynamicDB)
         else:
             matches = SharedFunctions.spaceMatches(2, equalMatches)
             listOfKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)
