@@ -3,29 +3,47 @@ import json
 import ast
 import SharedFunctions
 
+""" Module: Update
+    Description: holds all information relating to updates, including 
+                 processing input
+    Classes: Update
+"""
+
 class Update:
-    #def super(Insert, self).super()
+    """ Update Class holds all information relating to updates, including
+    processing input.
+
+    Variables:
+    matches - the passed in raw input from handleInput
+    updatedRow - the new row we update its corresponding key with
+    replacedRow - the row that was replaced (had its information updated)
+    typesSet - the current set of all currently held column types
+
+    Functions:
+    handleUpdates: parses matches to input used to update an existing row
+                   (if the key and its value don't exist, we print an error
+                   message instead).
+
+    """
     def __init__(self, matches, typesSet):
         self.matches = matches
         self.updatedRow = {}
         self.replacedRow = {}
         self.typesSet = typesSet
 
-    """ handleUpdates handles anything in the form UPDATE [key] WTIH VALUES """
-    """ (col=tag, col2=tag2, etc). Any other format causes the file to abandon """
-    """ the modification. Through each (col=tag, col2=tag2, etc), we change """
-    """ tag type's value to be the new value the user passed in. This set of """
-    """ changed values is then set to be the data with the value associated """
-    """ with the key. Other irregularities causing abandonment of modification """
-    """ include the type not being in the set of accepted types, and having """
-    """ tags/values without the other. """
-    """ @:param: matches, a list of strings of words """
-    """ @:param: dynamicDB, the key value store maintained in the program """
-    """ @:return: newOldRows, the tuple of a new row to update with, and the row """
-    """           to be replaced """
-
     def handleUpdates(self, dynamicDB):
-        newOldRows = ()
+        """ handleUpdates handles anything in the form UPDATE [key] WTIH VALUES
+        (col=tag, col2=tag2, etc). Any other format causes the file to abandon
+        the modification. Through each (col=tag, col2=tag2, etc), we change
+        tag type's value to be the new value the user passed in. This set of
+        changed values is then set to be the data with the value associated
+        with the key. Other irregularities causing abandonment of modification
+        include the type not being in the set of accepted types, and having
+        tags/values without the other.
+        dynamicDB - the key value store maintained in the program
+        self.updatedRow, self.replacedRow - the tuple of a new row to update
+                                            with, and the row to be replaced
+        """
         error = False
         usage = "Usage:\n UPDATE [key] WITH  VALUES (col=tag, col2=tag2...) \n"
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
@@ -51,11 +69,6 @@ class Update:
                         if matches[colIndex] not in self.typesSet:
                             self.typesSet.add(matches[colIndex])
                         allVals[matches[colIndex]] = matches[colIndex + 1]
-
-                        #else:
-                        #    print(matches[colIndex], " is an invalid column type! \n "
-                        #          , usage)
-                        #    error = True
                     # Now set the data of the row to be the modified values.
                     dynamicDB[key]['data'] = allVals
                     self.updatedRow = {key: {'isFree': 'false', 'data': allVals}}
@@ -63,8 +76,6 @@ class Update:
                                          ast.literal_eval(replaced)}}
             else:
                 print("The key is not in the store!")
-                error = True
         else:
             print("UPDATE format is incorrect. \n", usage)
-            error = True
         return self.updatedRow, self.replacedRow
