@@ -1,30 +1,52 @@
-import json
 import sys
+
+""" Module: OutputFile
+    Description: OutputFile.py contains functions specifically to write to 
+                 the intended storage file.
+
+    Functions: 
+
+        saveChanges - saves changes made to the running key value store
+
+        updateFileWithUpdates - saves all updates to the storage file
+
+        updateFileWithDeletes - saves all deletions to the storage file
+        
+        updateFileWithInserts - saves all insertions ot the storage file
+"""
 
 # Note: all global variables will not be modified
 # size of blocks of memory in bytes
 blockSize = 1000
-""" saveChanges saves the currently running key value store """
-""" to the storage file (which will be created if necessary). """
-""" The indices of the deleted keys are stored in a list, which """
-""" are then passed to updateFileWithDeletes to delete from """
-""" the storage file. Next, for every "key" that was updated, """
-""" the index of the key (from the list of keys """
-""" obtained from the dictionary), the key itself, and its value """
-""" are stored in a list, which is used to update the corresponding line in """
-""" the storage file, and finally, the list of inserted rows is passed to """
-""" the updateFileWithInserts, where the information is written to the """
-""" end of the file. """
-""" @param: isnewDBFile, a boolean indicating if the file is new """
-""" @param: storageDBFile, the name of the file storing the rows """
-""" @param: dynamicDB, the key value store maintained in the program """
-""" @param: deletedKeys, the list of keys deleted from the store """
-""" @param: insertedRows, the list of inserted rows """
-""" @param: updatedRows, the list of updated rows """
-""" @return: None """
+
+
 def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
                 deletedKeys, insertedRows, updatedRows,
                 maximumPosition):
+    """ saveChanges saves the currently running key value store
+    to the storage file (which will be created if necessary).
+
+     The indices of the deleted keys are stored in a list, which
+     are then passed to updateFileWithDeletes to delete from
+     the storage file. Next, for every "key" that was updated,
+     the index of the key (from the list of keys
+     obtained from the dictionary), the key itself, and its value
+     are stored in a list, which is used to update the corresponding line in
+     the storage file, and finally, the list of inserted rows is passed to
+     the updateFileWithInserts, where the information is written to the
+     end of the file.
+
+     Keyword Arguments:
+     isnewDBFile - a boolean indicating if the file is new
+     storageDBFile - the name of the file storing the rows
+     dynamicDB - the key value store maintained in the program
+     deletedKeys - the list of keys deleted from the store
+     insertedRows - the list of inserted rows
+     updatedRows - the list of updated rows
+
+     No return values
+     """
+
     # Once the key value store is to be closed, we save any changes.
     # If the key value store file didn't exist yet, then
     # a new one is created here.
@@ -71,21 +93,26 @@ def saveChanges(isNewDBFile, storageDBFile, dynamicDB,
         maximumPosition = updateFileWithInserts(storageDBFile, insertedRows, maximumPosition)
     return maximumPosition
 
-""" updateFileWithUpdates modifies the  """
-""" value store from the storage file. As Python 3.6+ preserves order """
-""" in dictionaries, it's possible to recall the positions of keys (in the """
-""" storage file) to be updated by """
-""" using simple Python function calls (handled in the main function). """
-""" The list of these indices is the argument. As the key did not change, """
-""" the positions that changed are passed in as a list with its associated """
-""" key and row and then using read lines, we modifiy only the lines """
-""" we want and then write them back to the file. """
-""" @param: storageDBFile, the name of the file storing the rows  """
-""" @:param: updatedRows, the list of line information of rows to update. """
-"""          Each tuple includes the line indices and the new information """
-"""          to write, including the key and new information. """
-""" @:return: None """
+
 def updateFileWithUpdates(storageDbFile, updatedRows):
+    """ updateFileWithUpdates modifies the value store from the storage file.
+
+    As Python 3.6+ preserves order
+    in dictionaries, it's possible to recall the positions of keys (in the
+     storage file) to be updated by
+    using simple Python function calls (handled in the main function).
+    The list of these indices is the argument. As the key did not change,
+     the positions that changed are passed in as a list with its associated
+     key and row and then using read lines, we modifiy only the lines
+     we want and then write them back to the file.
+
+     storageDBFile - the name of the file storing the rows
+     updatedRows - the list of line information of rows to update.
+              Each tuple includes the line indices and the new information
+              to write, including the key and new information.
+     No return values
+     """
+
     # We can write back
     # We read each line currently in the storage file
     # as a separate element in a list.
@@ -104,17 +131,23 @@ def updateFileWithUpdates(storageDbFile, updatedRows):
             open_file.write(line)
 
 
-""" updateFileWithDeletes removes items marked for deletion in the key """
-""" value store from the storage file. As Python 3.6+ preserves order """
-""" in dictionaries, it's possible to recall the positions of keys (in the """
-""" storage file) to be deleted by """
-""" using simple Python function calls (handled in the main function). """
-""" The list of these indices is the argument."""
-""" @param: storageDBFile, the name of the file storing the rows  """
-""" @param: indicesDeleted, the list of line indices to delete. """
-""" @:return: None """
 def updateFileWithDeletes(storageDbFile, indicesDeleted):
-    # lines pushed back
+    """ updateFileWithDeletes removes items marked for deletion in the key
+    value store from the storage file.
+
+    As Python 3.6+ preserves order
+     in dictionaries, it's possible to recall the positions of keys (in the
+     storage file) to be deleted by
+     using simple Python function calls (handled in the main function).
+     The list of these indices is the argument.
+
+     Keyword Arguments:
+     storageDBFile - the name of the file storing the rows
+     indicesDeleted - the list of line indices to delete.
+
+     No return values
+     """
+
     # We read each line currently in the storage file
     # as a separate element in a list.
     indList = sorted(indicesDeleted, reverse=True)
@@ -136,17 +169,21 @@ def updateFileWithDeletes(storageDbFile, indicesDeleted):
         open_file.truncate()
 
 
-""" In updateFileWithInserts, """
-""" We are appending to the end of the file, as all rows to be deleted """
-""" have been deleted. We write a new row corresponding to each value we """
-""" insert. The format of writing should be similar to the method of first """
-""" writing in the lines in the first place."""
-""" @param: storageDBFile, the name of the file storing the rows  """
-""" @param: insertedRows, the list of rows to insert to the file """
-""" @param: maximumPosition, the final position in the file, incremented """
-"""         with each inserted row """
-""" @:return: None """
 def updateFileWithInserts(storageDbFile, insertedRows, maximumPosition):
+    """ In updateFileWithInserts,
+     We are appending to the end of the file, as all rows to be deleted
+     have been deleted.
+
+     We write a new row corresponding to each value we
+     insert. The format of writing should be similar to the method of first
+     writing in the lines in the first place.
+     storageDBFile - the name of the file storing the rows
+     insertedRows - the list of rows to insert to the file
+     maximumPosition - the final position in the file, incremented
+             with each inserted row
+
+     No return values
+     """
     with open(storageDbFile, 'a+b') as file1:
         for item1 in insertedRows:
             maximumPosition += 1

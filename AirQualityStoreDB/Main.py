@@ -101,6 +101,12 @@ class pistolShrimpStore:
               len(self.updatedRows), " updates!", "\n")
 
     def invokeSave(self):
+        # TODO: Test this
+        for item in self.dynamicDB:
+            for tup in self.renamedColumns:
+                if tup.original in self.dynamicDB[item]:
+                    self.updatedRows.update(self.dynamicDB[item])
+
         self.maximumPosition = OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
                                self.deletedKeys, self.insertedRows, self.updatedRows,
                                self.maximumPosition)
