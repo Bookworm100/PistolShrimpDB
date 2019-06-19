@@ -11,16 +11,88 @@ import OutputFile
 import Selects
 import Search
 
+""" Module: Main 
+    Description: Main.py is the main engine of this key value store.
+
+    Class:
+        renamed - a renamed class storing a tuple of a renamed column
+                  the name that that column type now bears.
+        
+        PistolShrimpStore - the class that represents the key value store and
+                            other variables necessary to keep the value store
+                            inserting, deleting, updating, selecting, searching,
+                            and finding correctly.
+
+    Functions: 
+
+        handleFileInput - The user is asked to specify a file to load the data
+                          from, and then places to load the data and columns
+                          (which is always optional).
+        
+        main - Runs the main engine by calling handleFileInput, then creates
+               the instances of InputFile and PistolShrimpStore, which handles 
+               nearly all the following work.
+               
+        
+        
+"""
+
+
 class renamed:
+    """ A tuple of the original and new names of a specific column.
+
+    Variables:
+    original - the original name
+    new - the new name of the renamed column
+    """
+
     def __init__(self, col1, col2):
         self.original = col1
         self.new = col2
 
 class pistolShrimpStore:
+    """ pistolShrimpStore represents the key value store and everything necessary
+        to keep the value store inserting, deleting, updating, selecting,
+        searching, and finding correctly.
+
+       Variables:
+       dynamicDB - the key value store that is all the fuss
+       storageFile - the storage file that will be written to
+       insertedRows - the maintained dictionary of every insertedRow
+                      since the last save/undo or opening of the program
+       deletedKeys - the list of every deleted key since the last save/undo or
+                     opening of the program
+       updatedRows - the dictionary of every updated row since the last
+                     save/undo or opening of the program
+       replacedRows - the dictionary of replacedRow objects since the last
+                      save/undo or opening of the program (from update)
+       renamedColumns - the list of renamed column objects with the original
+                        and renamed names
+       maximumPosition - the maintained maximum position used to write to the
+                         storage file when adding inserting rows.
+       isNewDBFile - the flag indicating if this is a new dbfile
+       typesSet - the set of column types currently in existence
+
+       Functions:
+       handleInput: passes the input to instaances of Update, Delete, Insert,
+                    Search, and Select
+       reset: resets the values of insertedRows, deletedKeys, updatedRows,
+              replacedRows, and renamedColumns after a save/undo.
+       invokeUndo: Reverts all changes to dynamicDB since the last save/undo or
+                   opening of the file, and then calls reset
+       invokeSave: Saves all changes to dynamicDB to the storage file since the
+                   last save/undo or opening of the file, and then calls reset
+       handleRenamed: renames all the columns in dynamicDB and saves the
+                      renamedObject in case of undo.
+       run: The main program function of the file, and invokes input, and
+            handles any action (such as to turn the input to handleInputs
+            or to exit the program)
+
+
+    """
 
     def __init__(self, storageFile, dynamicDB, isNewDBFile, maximumPosition,
                  typesSet):
-        #self.filename = name
         self.dynamicDB = dynamicDB
         self.storageFile = storageFile
         self.insertedRows = {}
@@ -28,33 +100,38 @@ class pistolShrimpStore:
         self.updatedRows = {}
         self.replacedRows = {}
         self.renamedColumns = []
-        self.maximumPosition = 0
         self.isNewDBFile = isNewDBFile
         self.maximumPosition = maximumPosition
         self.typesSet = set(typesSet)
 
-    """ handleInput will be used to execute commands to change the key value """
-    """ store. This will soon handle insertions, deletions, select statements, """
-    """ update statements, and search statements. Insert commands will return """
-    """ the new rows, Delete statements will simply change the tag values  """
-    """ and return nothing, SELECT and SEARCH STATEMENTS will print the outputs """
-    """ while also returning nothing."""
-    """ @param: command, the raw command passed in by the user """
-    """ @param: dynamicDB, the key value store running in the program """
-    """ @return: insertedRows, deletedKeys, updateResults: a tuple of """
-    """          a list of inserted rows, a list of keys just deleted, """
-    """          and a tuple of rows that were inserted and their corresponding """
-    """          rows that were replaced. """
-
     def handleInput(self, command):
+        """ handleInput will be used to execute commands to change the key value
+        store.
+
+        This handles insertions, deletions, select statements,
+        update statements, search/find statements, and rename statements.
+        Insert commands will return the new rows, Delete statements returns a
+        list of keys of deleted items, Update statements return updated rows,
+        rename statements return rename objects of tuples, and
+        SELECT, SEARCH, and FIND STATEMENTS will print the outputs
+        while also returning nothing.
+
+        Keyword Argument:
+        command, the raw command passed in by the user
+
+        Return values:
+         changesMade - an object of type Insert, Delete, Update, Rename,
+         or None depending on which command the input was to execute.
+         The object will be used to update dynamicDB and any variables
+         used to keep track of changes for save/undo purposes.
+         """
+
         # check the inputs
-        # TODO: Change command to lowercase, pass in removed command
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'",]+', re.IGNORECASE)
         matches = parser.findall(command)
         changesMade = None
         if matches[0].lower() == 'insert':
             changesMade = Insert(matches, self.typesSet)
-            #insertedRows = handleInserts(matches, dynamicDB)
         elif matches[0].lower() == 'rename':
             changesMade = renamed(matches[1].lower(), matches[2].lower())
         elif matches[0].lower() == 'delete':
@@ -70,6 +147,11 @@ class pistolShrimpStore:
         return changesMade
 
     def reset(self):
+        """resets the values of insertedRows, deletedKeys, updatedRows,
+              replacedRows, and renamedColumns after a save/undo.
+        No Keyword Arguments or return values
+        """
+
         # The applicable changes have been saved to the
         # storage file, so we no longer need them.
         self.insertedRows.clear()
@@ -80,15 +162,24 @@ class pistolShrimpStore:
 
 
     def invokeUndo(self):
+        """Reverts any changes made to dynamicDB since the last save/undo
+           or loading of the program.
+           No Keyword Arguments or return values
+        """
+
+        # Delete any added row
         for each in self.insertedRows:
             del self.dynamicDB[each]
 
+        # Reset 'isFree' of deleted rows
         for each in self.deletedKeys:
             self.dynamicDB[each]['isFree'] = 'false'
 
+        # Restore replaced rows
         for each in self.replacedRows:
             self.dynamicDB[each] = self.replacedRows[each]
 
+        # Revert renaming of columns
         for each in self.dynamicDB:
             for tup in self.renamedColumns:
                 col2, col1 = tup
@@ -101,15 +192,24 @@ class pistolShrimpStore:
               len(self.updatedRows), " updates!", "\n")
 
     def invokeSave(self):
+        """ saves all changes to dynamicDB.
+
+        No Keyword Arguments or return values
+        """
         # TODO: Test this
+        # Add renamed values to updated rows
         for item in self.dynamicDB:
             for tup in self.renamedColumns:
                 if tup.original in self.dynamicDB[item]:
                     self.updatedRows.update(self.dynamicDB[item])
 
-        self.maximumPosition = OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
-                               self.deletedKeys, self.insertedRows, self.updatedRows,
-                               self.maximumPosition)
+        # Save all updates (replacemed columns go here), deletes, and insertions
+        self.maximumPosition = OutputFile.\
+                               saveChanges(self.isNewDBFile, self.storageFile,
+                                           self.dynamicDB, self.deletedKeys,
+                                           self.insertedRows, self.updatedRows,
+                                           self.maximumPosition)
+        # Get rid of deleted keys
         for each in self.deletedKeys:
             del self.dynamicDB[each]
         print("Successfully saved ", len(self.insertedRows), " insertions, "
@@ -117,6 +217,9 @@ class pistolShrimpStore:
               len(self.updatedRows), " updates!", "\n")
 
     def handleRenamed(self, handleValue):
+        # TODO: Finish documentation for handleRenamed and Main
+        """
+        """
         col1 = handleValue.original
         col2 = handleValue.new
         tup = (col1, col2)

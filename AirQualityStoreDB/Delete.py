@@ -65,5 +65,6 @@ class Delete:
         else:
             print("Delete format is incorrect. Usage:\n DELETE [key] "
                   " \n DELETE VALUES (col=tag,"
-                  " col2=tag2, col3=tag3...)")
+                  " col2=tag2, col3=tag3...) \n DELETE VALUES (col=tag"
+                  " AND/OR col2=tag2 AND/OR col3=tag3...)")
         return self.selectedKeys
