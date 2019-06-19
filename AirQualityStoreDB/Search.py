@@ -1,9 +1,101 @@
 import difflib
-from itertools import groupby
-import AndsandOrs
 import SharedFunctions
+import json
 
 
+def searchList(col, pattern, item1, findInKeys, findInVals,
+               filterItems, toFind=False, limit=0.8):
+    """ searchList collects keys for deletes and selects.
+
+            Keyword arguments:
+            matches -- the list of pairs used to filter the key value store
+            dynamicDB -- the key value store
+
+            Return values:
+            selectedKeys -- the list of keys selected from the store which
+                            contain the pairs
+    """
+    predicate1 = False
+    predicate2 = False
+    checkedThisColumn = predicate2
+    predicate3 = False
+    # If the user specifies to look at the keys, we compute the ratio distance
+    # only if the user specified to find rather than to search.
+    if findInKeys:
+        ratioDistance = 0
+        if toFind:
+            ratioDistance = difflib.SequenceMatcher(None, item1, pattern).ratio()
+        predicate1 = (item1.find(pattern) != -1) or (toFind and
+                                                     ratioDistance > limit)
+    # We examine if a pattern is in a key if necessary. If a column is
+    # associated with the pattern, then we check only if the associated pattern
+    # matches the value at that column.
+    if findInVals:
+        for item2 in filterItems[item1]['data']:
+            if item2 is None:
+                continue
+            ratioDistance = 0
+            if toFind and col != '':
+                ratioDistance = difflib.SequenceMatcher(None, item2, col).ratio()
+            predicate2 = (item2.find(col) != -1) or (toFind and
+                                                     ratioDistance > limit)
+            checkedThisColumn = predicate2 or checkedThisColumn
+            if col == '' or predicate2:
+                item3 = filterItems[item1]['data'][item2]
+                if item3 is None:
+                    continue
+                if toFind:
+                    ratioDistance = difflib.SequenceMatcher(None, item3,
+                                                            pattern).ratio()
+                predicate3 = (item3.find(pattern) != -1) or \
+                             (toFind and ratioDistance > limit) or predicate3
+    # Either the value should be found in the key, or in a
+    # value matching a column (if specified).
+    return predicate1 or (checkedThisColumn and predicate3)
+
+
+def searchFilter(findInKeys, findInVals, matches, usage, dynamicDB,
+                     checkColTypeVal, toFind=False, limit=0.8):
+    filterItems = dynamicDB
+    toWrite = ""
+    selectedKeys = []
+    for eachKey in filterItems:
+        include = False
+        for orClause in matches:
+            meetsAllAnds = True
+            for andClause in orClause:
+                if checkColTypeVal:
+                    if andClause[0].find('=') != -1:
+                        lineList = andClause.split('=')
+                    else:
+                        lineList = andClause
+                    if len(lineList) % 2 != 0:
+                        print("Column types must be associated with column values!"
+                              " As a reminder, the usage is below: \n ", usage)
+                        return ''
+                    else:
+                        col = lineList[0]
+                        pattern = lineList[1]
+                        meetsAllAnds = searchList(col, pattern, eachKey,
+                                                  findInKeys, findInVals,
+                                                  filterItems, toFind, limit)\
+                                                  & meetsAllAnds
+                else:
+                    meetsAllAnds = searchList('', andClause[0], eachKey,
+                                              findInKeys, findInVals,
+                                              filterItems, toFind, limit) \
+                                              & meetsAllAnds
+            if meetsAllAnds:
+                include = True
+        if include:
+            selectedKeys.append(eachKey)
+    if len(selectedKeys) == 0:
+        print("Sorry, nothing in the store matches! Check your input or "
+              "column types.")
+    for each in selectedKeys:
+        toWrite += each + ": " + json.dumps(dynamicDB[each]['data']) + '\n'
+    toWrite += str(len(selectedKeys)) + " items found.\n"
+    return toWrite
 
 
 """ There are 4 options for handling searches. These are of the form: """
@@ -62,11 +154,10 @@ def handleSearches(matches, dynamicDB, isFind=False):
         # out to their corresponding lists to be called in printSearchResult.
         if "and" in substringToCheck or "or" in substringToCheck:
             matches = SharedFunctions.conjMatches(0, matches)
-            toWrite += AndsandOrs.processAndandOrs(False, True, matches,
+            toWrite += searchFilter(False, True, matches,
                                                    usage, dynamicDB,
                                                    seeColTypeValue, isFind,
                                                    limit)
-            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
         else:
             newList = []
             matches = SharedFunctions.spaceMatches(0, matches)
@@ -80,7 +171,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
             else:
                 newList = [[i] for i in matches]
             if not error:
-                toWrite += AndsandOrs.processAndandOrs(False, True, [newList],
+                toWrite += searchFilter(False, True, [newList],
                                                        usage, dynamicDB,
                                                        seeColTypeValue, isFind,
                                                        limit)
@@ -94,7 +185,6 @@ def handleSearches(matches, dynamicDB, isFind=False):
             matches[2].lower() == "values":
         if "and" in substringToCheck[15:] or "or" in substringToCheck:
             matches = SharedFunctions.conjMatches(3, matches)
-            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
         else:
             matches = SharedFunctions.spaceMatches(3, matches)
             matches = [[[i] for i in matches]]
@@ -102,7 +192,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
         #for i in range(0, len((compList))):
         #    item = list((list(g) for k, g in groupby(compList[i], key=lambda x: (x.lower() != 'and')) if k))
         #    compList[i] = item
-        toWrite += AndsandOrs.processAndandOrs(True, True, matches, usage,
+        toWrite += searchFilter(True, True, matches, usage,
                                                dynamicDB, seeColTypeValue,
                                                isFind, limit)
     # Case 4 (we are looking through keys, and the patterns are
@@ -114,11 +204,10 @@ def handleSearches(matches, dynamicDB, isFind=False):
         #    compList[i] = item
         if "and" in substringToCheck or "or" in substringToCheck:
             matches = SharedFunctions.conjMatches(1, matches)
-            #listOfKeys += AndsandOrs.processAndandOrs2('', matches, dynamicDB)
         else:
             matches = SharedFunctions.spaceMatches(1, matches)
             matches = [[[i] for i in matches]]
-        toWrite += AndsandOrs.processAndandOrs(True, False, matches, usage,
+        toWrite += searchFilter(True, False, matches, usage,
                                                dynamicDB, seeColTypeValue,
                                                isFind, limit)
     else:
@@ -133,79 +222,3 @@ def handleSearches(matches, dynamicDB, isFind=False):
         error = True
     if not error and toWrite != '':
         SharedFunctions.printSelectsSearches("searchResult.txt", toWrite)
-
-
-""" printSearchResult filters per pattern. For each pattern specified,"""
-""" each row is examined if the pattern is found in a key (if specified) or """
-""" values (again, if specified). The filtered items are printed. """
-""" @:param: findInKeys, whether to look through the keys """
-""" @:param: findInVals, whether to look through the values """
-""" @:param: cols, the column types to search through """
-""" @:param: patterns, the values to look through """
-""" @:return: toWrite, the string that will be written to the file """
-def printSearchResult(findInKeys, findInVals, cols, patterns, selectKeys, dynamicDB, toFind=False, limit=0.8):
-    selected = set()
-    filterItems = {}
-    for each in selectKeys:
-        newVal = {}
-        newVal[each] = dynamicDB[each]
-        filterItems.update(newVal)
-        #filterItems.update()
-    for colIndex in range(0, len(patterns)):
-        col = ''
-        # If there is a column name associated
-        # with the search filer, then we
-        # extract that value.
-        if cols:
-            col = cols[colIndex]
-        val = patterns[colIndex]
-        # We filter each row from the
-        # filtered key value store.
-        for item1 in selectKeys:
-            # We examine if a pattern is in a key if necessary.
-            if findInKeys:
-                ratioDistance = 0
-                if toFind:
-                    ratioDistance = difflib.SequenceMatcher(None, item1,
-                                                            val).ratio()
-                predicate = (item1.find(val) != -1) or (toFind and
-                                                        ratioDistance > limit)
-                if predicate:
-                    selected.add(item1)
-                    continue
-            # We examine if a pattern is in a key if necessary.
-            # If a column is associated with the pattern,
-            # then we check only if the associated pattern
-            # matches the value at that column.
-            if findInVals:
-                for item2 in filterItems[item1]['data']:
-                    if item2 is None:
-                        continue
-                    ratioDistance = 0
-                    if toFind and col != '':
-                        ratioDistance = difflib.SequenceMatcher(None, item2,
-                                                                col).ratio()
-                        #ratioDistance = float((editDistance(item2, col))) / \
-                                        #float(len(item2))
-                        #print("computed")
-                    predicate = (item2.find(col) != -1) or (toFind and
-                                                            ratioDistance > limit)
-                    if col == '' or predicate:
-                        item3 = filterItems[item1]['data'][item2]
-                        if item3 is None:
-                            continue
-                        if toFind:
-                            ratioDistance = difflib.SequenceMatcher(None, item3,
-                                                                    val).ratio()
-                            #ratioDistance = float((editDistance(item3, val))) / \
-                            #                float(len(item3))
-                            #print("computed2")
-                        predicate = (item3.find(val) != -1) or (toFind and
-                                                                ratioDistance > limit)
-                        #print(item3)
-
-                        if predicate:
-                            selected.add(item1)
-                            #print("updated")
-        return selected
-

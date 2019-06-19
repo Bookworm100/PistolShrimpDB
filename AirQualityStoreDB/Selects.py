@@ -4,7 +4,6 @@ from itertools import groupby
 from jsonpath_ng import jsonpath, parse
 import operator
 import SharedFunctions
-import AndsandOrs
 
 """ This should handle anything """
 """ with selects. Either completed or very, very close to completion. """
@@ -73,7 +72,6 @@ def handleSelects(matches, dynamicDB):
         else:
             copy = {'data' : dynamicDB}
             some_str = "data.." + matches[1]
-            #print(some_str)
             expr = parse(some_str)
             vals = set()
             for match in expr.find(copy):
@@ -86,10 +84,10 @@ def handleSelects(matches, dynamicDB):
         listOfKeys = []
         if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
             matches = SharedFunctions.conjMatches(2, equalMatches)
-            listOfKeys += AndsandOrs.selectKeyswithAndOrs(matches, dynamicDB)
+            listOfKeys += SharedFunctions.selectKeyswithAndOrs(matches, dynamicDB)
         else:
             matches = SharedFunctions.spaceMatches(2, equalMatches)
-            listOfKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)
+            listOfKeys += SharedFunctions.findMatchingKeys(matches, dynamicDB)
         new_input = 'matches.txt'
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \

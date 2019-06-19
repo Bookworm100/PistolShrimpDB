@@ -1,6 +1,5 @@
 import re
 from itertools import groupby
-import AndsandOrs
 import SharedFunctions
 
 class Delete:
@@ -21,18 +20,16 @@ class Delete:
     """ @:return: selectedKeys, the list of keys that we delete from the store. """
 
     def handleDeletes(self, dynamicDB):
-        key = ''
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
         matches = parser.findall(" ".join(self.matches))
         # This is if the input is in the form DELETE VALUES (col=tag, col2=tag2...)
         if matches[1].lower() == 'values' and len(matches) >= 3:
             if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
                 matches = SharedFunctions.conjMatches(2, self.matches)
-                self.selectedKeys += AndsandOrs.selectKeyswithAndOrs(matches, dynamicDB)
+                self.selectedKeys += SharedFunctions.selectKeyswithAndOrs(matches, dynamicDB)
             else:
                 matches = SharedFunctions.spaceMatches(2, self.matches)
-                self.selectedKeys += SharedFunctions.findMatchingKeys('', matches, dynamicDB)
-            #matches = SharedFunctions.conjMatches(key, matches)
+                self.selectedKeys += SharedFunctions.findMatchingKeys(matches, dynamicDB)
         # This is if just a key was specified.
         elif len(matches) == 2:
             if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()] \
