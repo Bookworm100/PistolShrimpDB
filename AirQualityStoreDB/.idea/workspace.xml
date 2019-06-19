@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Delete.py" beforeDir="false" afterPath="$PROJECT_DIR$/Delete.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/InputFile.py" beforeDir="false" afterPath="$PROJECT_DIR$/InputFile.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Insert.py" beforeDir="false" afterPath="$PROJECT_DIR$/Insert.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -57,12 +55,12 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="419" />
-          <entry key="py" value="68829" />
+          <entry key="py" value="68887" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="69248" />
+          <entry key="Python" value="69306" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -85,7 +83,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="64">
+            <state relative-caret-position="3757">
               <caret line="245" column="32" lean-forward="true" selection-start-line="245" selection-start-column="32" selection-end-line="245" selection-end-column="32" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
@@ -150,11 +148,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Insert.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1683">
-              <caret line="99" column="51" selection-start-line="99" selection-start-column="51" selection-end-line="99" selection-end-column="51" />
+            <state relative-caret-position="1069">
+              <caret line="63" column="19" selection-start-line="63" selection-start-column="19" selection-end-line="63" selection-end-column="19" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
-                <marker date="1560920347861" expanded="true" signature="697:698" ph="..." />
+                <marker date="1560920527033" expanded="true" signature="697:698" ph="..." />
               </folding>
             </state>
           </provider>
@@ -211,8 +209,8 @@
       <find>where</find>
       <find>save</find>
       <find>self.updatedRows.update</find>
-      <find>invoke</find>
       <find>findmatchin</find>
+      <find>invoke</find>
     </findStrings>
     <replaceStrings>
       <replace>substringToCheck</replace>
@@ -488,21 +486,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="64">
-          <caret line="245" column="32" lean-forward="true" selection-start-line="245" selection-start-column="32" selection-end-line="245" selection-end-column="32" />
-          <folding>
-            <element signature="e#62#76#0" expanded="true" />
-            <marker date="1560915411711" expanded="true" signature="270:361" ph="..." />
-            <marker date="1560915411711" expanded="true" signature="2910:3188" ph="..." />
-            <marker date="1560915411711" expanded="true" signature="3188:3194" ph="..." />
-            <marker date="1560915411711" expanded="true" signature="3189:3190" ph="..." />
-            <marker date="1560915411711" expanded="true" signature="3215:3978" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/InputFile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="83">
@@ -523,13 +506,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3757">
+          <caret line="245" column="32" lean-forward="true" selection-start-line="245" selection-start-column="32" selection-end-line="245" selection-end-column="32" />
+          <folding>
+            <element signature="e#62#76#0" expanded="true" />
+            <marker date="1560915411711" expanded="true" signature="270:361" ph="..." />
+            <marker date="1560915411711" expanded="true" signature="2910:3188" ph="..." />
+            <marker date="1560915411711" expanded="true" signature="3188:3194" ph="..." />
+            <marker date="1560915411711" expanded="true" signature="3189:3190" ph="..." />
+            <marker date="1560915411711" expanded="true" signature="3215:3978" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Insert.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1683">
-          <caret line="99" column="51" selection-start-line="99" selection-start-column="51" selection-end-line="99" selection-end-column="51" />
+        <state relative-caret-position="1069">
+          <caret line="63" column="19" selection-start-line="63" selection-start-column="19" selection-end-line="63" selection-end-column="19" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
-            <marker date="1560920347861" expanded="true" signature="697:698" ph="..." />
+            <marker date="1560920527033" expanded="true" signature="697:698" ph="..." />
           </folding>
         </state>
       </provider>

@@ -54,11 +54,16 @@ class Insert:
         return key
 
     def generateNewRows(self, colValList):
-        """ generateNewRows will insert the new values to the dictionary key value """
-        """ store. and keep track of what should get added to the storage file """
-        """ upon exiting or quitting. """
-        """ @:param: colValList, a list of the parameters for the new row """
-        """ @:return: newValues, the inserted row (with a randomly generated key) """
+        """ generateNewRows creates the new values to the dictionary key value
+        store.
+
+        Keyword Argument:
+        colValList - a list of the parameters for the new row
+
+        Return values:
+        newValues - the inserted row (with a randomly generated key)
+        """
+
         # check that all columns are valid
         newValues = {}
         if len(colValList) % 2 == 1:
