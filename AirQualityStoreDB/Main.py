@@ -203,7 +203,7 @@ class pistolShrimpStore:
                 if tup.original in self.dynamicDB[item]:
                     self.updatedRows.update(self.dynamicDB[item])
 
-        # Save all updates (replacemed columns go here), deletes, and insertions
+        # Save all updates (replaced columns go here), deletes, and insertions
         self.maximumPosition = OutputFile.\
                                saveChanges(self.isNewDBFile, self.storageFile,
                                            self.dynamicDB, self.deletedKeys,
@@ -217,19 +217,30 @@ class pistolShrimpStore:
               len(self.updatedRows), " updates!", "\n")
 
     def handleRenamed(self, handleValue):
-        # TODO: Finish documentation for handleRenamed and Main
-        """
+        """ handleRenamed renames a column, basically replacing a column name
+        for every single row. A tuple representing the renamed object is
+        added to a list of renamed columns, for the purposes of save/undo.
+
+        Keyword Arguments:
+        handleValue - the renamed object we will use for renaming
+
+        No return values
         """
         col1 = handleValue.original
         col2 = handleValue.new
         tup = (col1, col2)
         counter = 0
+        # For each item in the key value store, if the original column name
+        # is in the item, then we rename that column by deleting that entry
+        # and then rewriting that entry with the new name.
         for each in self.dynamicDB:
             if col1 in self.dynamicDB[each]['data']:
                 counter += 1
                 reassigned = self.dynamicDB[each]['data'][col1]
                 del self.dynamicDB[each]['data'][col1]
                 self.dynamicDB[each]['data'][col2] = reassigned
+        # The following only occurs if the original column name is
+        # not in the store
         if counter == 0:
             print("The first column you specified does not exist! Please "
                   "note the syntax is RENAME col1 col2, where col1 is the"
@@ -240,6 +251,19 @@ class pistolShrimpStore:
             print("Successfully renamed ", col1, " as ", col2,"!")
 
     def run(self):
+        """ run is the main function managing the key value store.
+
+        When called, it takes in user input, which it uses to exit the program,
+        save, or undo the changes made. run also handles the modifications to
+        the key value store itself as run is where the changes from insert,
+        delete, and update are made to the running key store. Additionally, the
+        variables necessary to allow for saving and undoing changes are
+        maintained here. Finally, if the program is exited with exit or quit
+        changes are saved to file.
+
+        No keyword arguments or return value.
+        """
+
         # This section handles user input and passes it to
         # the handleInput function to change the key value
         # store.
@@ -250,33 +274,38 @@ class pistolShrimpStore:
                       " want your changes saved, or with abort if you don't. "
                       "You can also save your changes with save and undo"
                       " them with undo! \n")
-
+            # Handle exiting the program here
             if n == "quit" or n == "abort" or n == "exit":
                 if n == "abort":
                     toSave = False
                 break
             if len(n) == 0:
                 continue
-            # save and undo go here
+            # Handle saving and undoing changes here
             if n == "save":
                 self.invokeSave()
                 self.reset()
                 self.isNewDBFile = False
                 continue
             elif n == "undo":
-                # Do stuff
                 self.invokeUndo()
                 self.reset()
                 continue
             else:
+                # handle input here
                 handleValue = self.handleInput(n)
 
-                # check the class
+                # Check the type of return value. If the value is of type
+                # None, the key value store is to be updated. The actual
+                # renaming, insertion, deletion, and updating happens here.
                 if handleValue is not None:
                     if type(handleValue) == renamed:
                         self.handleRenamed(handleValue)
                     elif type(handleValue) == Insert:
                         newRow = handleValue.handleInserts(self.dynamicDB)
+                        # We keep track of all row that have been inserted since
+                        # the last save/undo or loading the program to either
+                        # write them to the file or to reverse these changes.
                         self.insertedRows.update(newRow)
                         self.dynamicDB.update(newRow)
                         for key in newRow:
@@ -286,7 +315,7 @@ class pistolShrimpStore:
                         row = handleValue.handleDeletes(self.dynamicDB)
                         for item in row:
                             self.dynamicDB[item]['isFree'] = 'true'
-                            # This is in the storage file, so
+                            # These are in the storage file, so
                             # we should erase them.
                             if 'position' in self.dynamicDB[item]:
                                 self.deletedKeys.append(item)
@@ -306,9 +335,9 @@ class pistolShrimpStore:
                         updatedRow, replacedRow = handleValue.handleUpdates(self.dynamicDB)
                         if updatedRow is not None and len(updatedRow) > 0:
                             for key in updatedRow:
-                                # If this is a new row (inserted after loading the
-                                # storage
-                                # file), then we simply change the inserted value.
+                                # If this is a new row (inserted after loading
+                                # the storage file), then we simply change the
+                                # inserted value.
                                 if key in self.insertedRows:
                                     self.insertedRows[key] = updatedRow[key]
                                 else:
@@ -317,19 +346,33 @@ class pistolShrimpStore:
                                         self.replacedRows.update(replacedRow)
                                 print("Successfully updated ", key, ": ",
                                       self.dynamicDB[key]['data'], "\n")
-
+        # If the user specified to exit or quit, we save the changes. We don't
+        # use invokeSave() as that involves unnecessary updating.
         if toSave:
+            for item in self.dynamicDB:
+                for tup in self.renamedColumns:
+                    if tup.original in self.dynamicDB[item]:
+                        self.updatedRows.update(self.dynamicDB[item])
             OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
                       self.deletedKeys, self.insertedRows, self.updatedRows,
                       self.maximumPosition)
 
 
-
-
-
-"""Here: the filename is specified, as is the column types to search for, """
-""" and where to find the data. """
 def handleFileInput():
+    """ This function asks for and processes user input of file types and
+    data/column information keywords.
+
+    The filename is specified, as is the column types to search for,
+    and where to find the data.
+
+    No keyword arguments
+
+    Return values:
+    toLoadFile - the file to load data from
+    whereKey - a keyword specifying where to possibly find column information
+    whereData - a keyword specifying where to possibly find data
+    """
+
     # Let the user specify which file to use
     toLoadFile = input("Welcome to PistolShrimpDB! If you would like to specify "
                        "a file to load from, type it here else, hit enter."
@@ -348,6 +391,8 @@ def handleFileInput():
                            "Please type in a valid file name and/or path. " +
                            "\n")
 
+    # Ask the user if they wish to specify where in the file to find
+    # data or column information.
     whereKey = input("If you would like to specify where the key or column "
                      "types are, type it here, else, hit enter."
                      "\n")
@@ -356,25 +401,29 @@ def handleFileInput():
                       "data is, type it here, else, hit enter."
                       "\n")
 
+    # Set default values if they don't specify.
     if len(whereKey) == 0:
         whereKey = "columns"
     if len(whereData) == 0:
         whereData = "data"
+
     return toLoadFile, whereKey, whereData
 
 
-""" The main function checks if a file exists that contains the key value """
-""" store, and if it does, then we load the store from the file. Otherwise, """
-""" one is initialized from a JSON file (as the store is configured around """
-""" a specific JSON file storing air quality measurements. This main """
-""" function will ideally hold handling user input and other operations """
-""" necessary, and when the key value store is closed, any changes are """
-""" written to the file which stores the key value store. Note: """
-""" This only works in Python 3.6+. Otherwise, we would """
-""" need to use something like orderedDict. """
-""" @params: none """
-""" @return: none """
 if __name__ == "__main__":
+    """ The main function checks the Python version and exits if the Python
+    version is too old. We then create a new instance of InputFile, with our
+    constructor arguments being the outputs of handleFileInput, which asks the
+    user to specify a file to load from, as well as where to find data and
+    column infomation. Once the file is loaded, we ask the user to specify an
+    output file. Finally, we set up an instance of pistolShrimpStore, which
+    is used for all the remaining work.
+    Note: This only works in Python 3.6+. Otherwise, we would need to use
+    something like orderedDict.
+    
+    No keyword arguments or return values 
+    """
+
     # This program will only work properly
     # with Python versions 3.6+, so we check that
     # the version is infact 3.6+
