@@ -386,8 +386,8 @@ def handleFileInput():
 
     while not os.path.isfile(toLoadFile):
         toLoadFile = input("We're sorry! This file does not seem to exist " +
-                            "or you did not specify a file when the storage"
-                            "file has not been created yet. "
+                           "or you did not specify a file when the storage"
+                           "file has not been created yet. "
                            "Please type in a valid file name and/or path. " +
                            "\n")
 

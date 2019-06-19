@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="9f7ce222-0e96-4f90-b757-2d0cc60a212e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SharedFunctions.py" beforeDir="false" afterPath="$PROJECT_DIR$/SharedFunctions.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -55,12 +56,12 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="419" />
-          <entry key="py" value="75904" />
+          <entry key="py" value="76010" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="76323" />
+          <entry key="Python" value="76429" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -80,28 +81,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="194">
-              <caret line="418" column="68" lean-forward="true" selection-start-line="418" selection-start-column="68" selection-end-line="418" selection-end-column="68" />
+            <state relative-caret-position="143">
+              <caret line="418" column="75" lean-forward="true" selection-start-line="418" selection-start-column="75" selection-end-line="418" selection-end-column="75" />
               <folding>
                 <element signature="e#62#76#0" expanded="true" />
-                <marker date="1560954976354" expanded="true" signature="1447:1538" ph="..." />
-                <marker date="1560954976354" expanded="true" signature="6344:6622" ph="..." />
-                <marker date="1560954976354" expanded="true" signature="6622:6628" ph="..." />
-                <marker date="1560954976354" expanded="true" signature="6623:6624" ph="..." />
-                <marker date="1560954976354" expanded="true" signature="6854:7727" ph="..." />
+                <marker date="1560955095693" expanded="true" signature="1447:1538" ph="..." />
+                <marker date="1560955095693" expanded="true" signature="6344:6622" ph="..." />
+                <marker date="1560955095693" expanded="true" signature="6622:6628" ph="..." />
+                <marker date="1560955095693" expanded="true" signature="6623:6624" ph="..." />
+                <marker date="1560955095693" expanded="true" signature="6854:7727" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SharedFunctions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="104" column="62" lean-forward="true" selection-start-line="104" selection-start-column="62" selection-end-line="104" selection-end-column="62" />
+            <state relative-caret-position="187">
+              <caret line="146" column="54" selection-start-line="146" selection-start-column="54" selection-end-line="146" selection-end-column="54" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -209,8 +210,8 @@
       <find>self.updatedRows.update</find>
       <find>invoke</find>
       <find>handlerenamed</find>
-      <find>replacedrow</find>
       <find>findmatchin</find>
+      <find>replacedrow</find>
     </findStrings>
     <replaceStrings>
       <replace>substringToCheck</replace>
@@ -224,7 +225,6 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/AndsandOrs.py" />
-        <option value="$PROJECT_DIR$/SharedFunctions.py" />
         <option value="$PROJECT_DIR$/Search.py" />
         <option value="$PROJECT_DIR$/Selects.py" />
         <option value="$PROJECT_DIR$/OutputFile.py" />
@@ -233,6 +233,7 @@
         <option value="$PROJECT_DIR$/Insert.py" />
         <option value="$PROJECT_DIR$/Delete.py" />
         <option value="$PROJECT_DIR$/Main.py" />
+        <option value="$PROJECT_DIR$/SharedFunctions.py" />
       </list>
     </option>
   </component>
@@ -331,16 +332,16 @@
     <frame x="-6" y="-6" width="1549" height="837" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978903" visible="true" weight="0.13615024" />
-      <window_info id="Structure" order="1" sideWeight="0.5021097" side_tool="true" visible="true" weight="0.13615024" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49790794" visible="true" weight="0.13615024" />
+      <window_info id="Structure" order="1" sideWeight="0.50209206" side_tool="true" visible="true" weight="0.13615024" />
       <window_info id="Favorites" order="2" weight="0.32997987" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.32956153" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32956153" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.33521923" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39745402" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.32390383" />
+      <window_info active="true" anchor="bottom" id="TODO" order="6" visible="true" weight="0.32390383" />
       <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.32673267" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
@@ -456,16 +457,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/SharedFunctions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="104" column="62" lean-forward="true" selection-start-line="104" selection-start-column="62" selection-end-line="104" selection-end-column="62" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Update.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="304">
@@ -519,15 +510,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="194">
-          <caret line="418" column="68" lean-forward="true" selection-start-line="418" selection-start-column="68" selection-end-line="418" selection-end-column="68" />
+        <state relative-caret-position="143">
+          <caret line="418" column="75" lean-forward="true" selection-start-line="418" selection-start-column="75" selection-end-line="418" selection-end-column="75" />
           <folding>
             <element signature="e#62#76#0" expanded="true" />
-            <marker date="1560954976354" expanded="true" signature="1447:1538" ph="..." />
-            <marker date="1560954976354" expanded="true" signature="6344:6622" ph="..." />
-            <marker date="1560954976354" expanded="true" signature="6622:6628" ph="..." />
-            <marker date="1560954976354" expanded="true" signature="6623:6624" ph="..." />
-            <marker date="1560954976354" expanded="true" signature="6854:7727" ph="..." />
+            <marker date="1560955095693" expanded="true" signature="1447:1538" ph="..." />
+            <marker date="1560955095693" expanded="true" signature="6344:6622" ph="..." />
+            <marker date="1560955095693" expanded="true" signature="6622:6628" ph="..." />
+            <marker date="1560955095693" expanded="true" signature="6623:6624" ph="..." />
+            <marker date="1560955095693" expanded="true" signature="6854:7727" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SharedFunctions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="146" column="54" selection-start-line="146" selection-start-column="54" selection-end-line="146" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

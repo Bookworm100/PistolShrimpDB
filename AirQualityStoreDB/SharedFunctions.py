@@ -67,6 +67,7 @@ def spaceMatches(index, matches):
         listOfItems[i] = listOfItems[i].strip()
     return listOfItems
 
+
 def conjMatches(index, matches):
     """For commands with ands/ors, conjMatches is used to separate out
     individual types and values, especially if they contain spaces.
@@ -142,8 +143,9 @@ def printSelectsSearches(default_file, toWrite):
                   "Y only if you want to print to output or N"
                   "if you don't and want to print to a file.\n")
     # The user must confirm if the size of the output
-    # is big.
-    if n.lower() == "y" and sys.getsizeof(toWrite) > 2000:
+    # is big (should be somewhere between 50 to 100 lines,
+    # as each line in the storage file is 1000 bytes).
+    if n.lower() == "y" and sys.getsizeof(toWrite) > 50000:
         n = input("The size of the output is pretty big. "
                   "Are you sure? Again, type Y or N.\n ")
         while n.lower() != "y" and n.lower() != "n":
