@@ -4,20 +4,47 @@ import re
 import ast
 import SharedFunctions
 
+""" Module: Insert
+    Description: holds all information relating to inserts, including 
+                 processing input
+    Classes: Insert
+"""
+
+
 class Insert:
-    #def super(Insert, self).super()
+    """ Insert Class holds all information relating to inserts, including
+       processing input.
+
+       Variables:
+       matches - the passed in raw input from handleInput
+       insertedRow - the new row we add to the key value store
+       typesSet - the current set of all currently held column types
+
+       Functions:
+       generateRandomKey:
+       generateNewRows:
+       handleUpdates: parses matches to input used to insert a new row
+
+       """
+
     def __init__(self, matches, typesSet):
         self.matches = matches
         self.insertedRow = {}
         self.typesSet = typesSet
 
-
-    """ generateRandomKey generates a random key to be used when inserting new """
-    """ values to the dictionary key value store. """
-    """ @:param: None """
-    """ @:return: key, a randomly generated key """
-
     def generateRandomKey(self):
+        """ generateRandomKey generates a random key to be used when inserting
+        new values to the dictionary key value store.
+
+        This is called if the user does not specify a key to insert with or if
+        the key the user supplies is already in the key value store.
+
+        No keyword arguments
+
+        Return values:
+        key - a randomly generated key
+        """
+
         key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
                                               string.digits, k=4))
         key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
@@ -26,16 +53,13 @@ class Insert:
         key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
         return key
 
-
-    """ generateNewRows will insert the new values to the dictionary key value """
-    """ store, and keep track of what should get added to the storage file """
-    """ upon exiting or quitting. """
-    """ @:param: colValList, a list of the parameters for the new row """
-    """ @:return: newValues, the inserted row (with a randomly generated key) """
-
     def generateNewRows(self, colValList):
-        # check that all columns are valid, and build up a dictionary.
-        # By looping through every pair, and
+        """ generateNewRows will insert the new values to the dictionary key value """
+        """ store. and keep track of what should get added to the storage file """
+        """ upon exiting or quitting. """
+        """ @:param: colValList, a list of the parameters for the new row """
+        """ @:return: newValues, the inserted row (with a randomly generated key) """
+        # check that all columns are valid
         newValues = {}
         if len(colValList) % 2 == 1:
             print("Column types must be associated with column values! "
@@ -45,8 +69,11 @@ class Insert:
                   " col2=tag2, col3=tag3...)")
             return {}
         for i in range(0, len(colValList), 2):
+            # Add the column type to typesSet if not in existence
             if colValList[i] not in self.typesSet:
                 self.typesSet.add(colValList[i])
+            # Check the type of the value type argument, and only convert to string
+            # if it is not a string yet, and generate the new row.
             if type(colValList[i + 1]) != str:
                 newValues[colValList[i]] = ast.literal_eval(str(colValList[i + 1]))
             else:
@@ -54,19 +81,25 @@ class Insert:
 
         return newValues
 
-
-    """ handleInserts passes a set of matches generated using regex. """
-    """ If a key is in the store, then a message """
-    """ explaining this is printed out and a random key is generated instead."""
-    """ If the format is incorrect (not """
-    """ as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….), """
-    """ INSERT VALUES (col=tag, col2=tag2, col3=tag3…), """
-    """ a usage is printed out, and the current operation is abandoned. """
-    """ @:param: matches, a list of strings of words """
-    """ @:param: dynamicDB, the key value store maintained in the program """
-    """ @:return: row, the row we just inserted """
-
     def handleInserts(self, dynamicDB):
+        """ handleInserts returns a newly generated row to be inserted to the
+         store.
+
+         First, the function passes a set of matches generated using regex. If
+         a key is in the store, then a message explaining this is printed out
+         and a random key is generated instead.
+         If the format is incorrect (not
+         as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….),
+         INSERT VALUES (col=tag, col2=tag2, col3=tag3…),
+         a usage is printed out, and the current operation is abandoned.
+
+         Keyword Arguments:
+         dynamicDB - the key value store maintained in the program
+
+         Return values:
+         self.insertedrow, the row we are inserting
+         """
+
         key = ''
         values = {}
         equalMatches = self.matches
@@ -98,7 +131,6 @@ class Insert:
             print("Insert format is incorrect. Usage:\n INSERT [key] WITH "
                   "VALUES (col=tag, col2=tag2...) \n INSERT VALUES (col=tag,"
                   " col2=tag2, col3=tag3...)")
-            # row = {}
         if values != {}:
             self.insertedRow = {key: {'isFree': 'false', 'data': values}}
         return self.insertedRow
