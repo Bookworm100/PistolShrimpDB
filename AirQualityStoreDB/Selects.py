@@ -1,8 +1,6 @@
 import re
 import json
-from itertools import groupby
-from jsonpath_ng import jsonpath, parse
-import operator
+from jsonpath_ng import parse
 import SharedFunctions
 
 """ This should handle anything """
