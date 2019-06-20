@@ -10,6 +10,6 @@ This will tell you how to set up the key value store! Yay!
 5. You will be prompted for the following three things: a filename to load data from, a keyword specifying 
 
 
-Bonus: If you're feeling up to it, you can start up the program and type "exit" to initially set up the storage file. You can also start browsing through and making changes based on the commands specified in Usage.md!
+Bonus: If you're feeling up to it, you can start up the program and type "exit" to initially set up the storage file. You can also start browsing through and making changes based on the commands specified in the [Usage](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Usage.md)!
 
-Coming soon - demonstration examples that you can use to test out this program!
+And be sure to check out the [Demo](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Demo.md)!

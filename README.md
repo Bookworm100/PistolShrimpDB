@@ -23,7 +23,7 @@ Check out:
 
 - [Future Work](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Future%20Work.md)
 
-- Sample Demo (Coming soon!)
+- [Demo](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Demo.md)
 
 
 
