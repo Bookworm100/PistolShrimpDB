@@ -57,14 +57,14 @@ The user can now:
 
 ## Week 8:
 The user now:
--Can input most JSON files which have tags meta and data at the top hierarchal level of the document.
--Can trivially project items (such as SELECT col1, even if the column type itself is nested somewhere in the values)
--Specify to AND/OR criteria (such as SELECT WHERE col=val AND/OR col2=val2 AND/OR col3=val3…)
+- Can input most JSON files which have tags meta and data at the top hierarchal level of the document.
+- Can trivially project items (such as SELECT col1, even if the column type itself is nested somewhere in the values)
+- Specify to AND/OR criteria (such as SELECT WHERE col=val AND/OR col2=val2 AND/OR col3=val3…)
 
 
 ## Weeks 9+:
 The user now:
--Can input most JSON files
--rename columns
--More efficiently select/delete/search/find items due to the way the keys are selected for while iterating through them
--And restructuring makes the code easier to maintain!
+- Can input most JSON files
+- Rename columns
+- More efficiently select/delete/search/find items due to the way the keys are selected for while iterating through them
+- And restructuring makes the code easier to maintain!

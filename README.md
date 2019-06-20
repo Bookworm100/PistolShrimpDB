@@ -17,13 +17,13 @@ Check out:
 
 - [Usage](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Usage.md) (Commands you need to run this key value store)
 
-- How does all this work? (Coming soon!)
+- [How does all this work?](https://github.com/Bookworm100/PistolShrimpDB/blob/master/How%20does%20this%20work%20(Architectural%20Details).md)
 
-- Challenges (Coming soon!)
+- [Challenges](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Challenges.md)
 
-- Future Work (Coming soon!)
+- [Future Work](https://github.com/Bookworm100/PistolShrimpDB/blob/master/Future%20Work.md)
 
-- Sample Demo (Comin soon!)
+- Sample Demo (Coming soon!)
 
 
 
