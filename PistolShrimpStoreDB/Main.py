@@ -3,6 +3,8 @@
 import os.path
 import sys
 import re
+import json
+import ast
 from InputFile import inputFile
 from Insert import Insert
 from Delete import Delete
@@ -45,7 +47,28 @@ class renamed:
     new -- the new name of the renamed column
     """
 
-    def __init__(self, col1, col2):
+    def __init__(self, All):
+        All = " ".join(All)
+        parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():",\s]+', re.IGNORECASE)
+        matches = parser.findall(All)
+        if len(matches) < 2 or (len(matches) > 3
+                                or (len(matches) == 3 and matches[1] != ' ')):
+            print("There should only be two columns! Please "
+                  "note the syntax is RENAME col1 col2, where col1 is the"
+                  " original column and col2 is the column name that is what"
+                  " you want col1 to be replaced with.")
+            self.original = None
+            self.new = None
+            return
+        col1 = matches[0]
+        if len(matches) == 2:
+            col2 = matches[1]
+        else:
+            col2 = matches[2]
+        if '\'' in col1:
+            col1 = col1[1:-1]
+        if '\'' in col2:
+            col2 = col2[1:-1]
         self.original = col1
         self.new = col2
 
@@ -131,7 +154,7 @@ class pistolShrimpStore:
         if matches[0].lower() == 'insert':
             changesMade = Insert(matches, self.typesSet)
         elif matches[0].lower() == 'rename':
-            changesMade = renamed(matches[1].lower(), matches[2].lower())
+            changesMade = renamed(matches[1:])
         elif matches[0].lower() == 'delete':
             changesMade = Delete(matches, self.typesSet)
         elif matches[0].lower() == 'update':
@@ -179,14 +202,6 @@ class pistolShrimpStore:
         for each in self.replacedRows:
             self.dynamicDB[each] = self.replacedRows[each]
 
-        # Revert renaming of columns
-        for each in self.dynamicDB:
-            for tup in self.renamedColumns:
-                col2, col1 = tup
-                reassigned = self.dynamicDB[each]['data'][col1]
-                del self.dynamicDB[each]['data'][col1]
-                self.dynamicDB[each]['data'][col2] = reassigned
-
         print("Successfully undoed ", len(self.insertedRows),
               " insertions, ", len(self.deletedKeys), " deletions, and ",
               len(self.updatedRows), " updates!", "\n")
@@ -196,13 +211,6 @@ class pistolShrimpStore:
 
         No Keyword Arguments or return values
         """
-
-        # TODO: Test this
-        # Add renamed values to updated rows
-        for item in self.dynamicDB:
-            for tup in self.renamedColumns:
-                if tup.original in self.dynamicDB[item]:
-                    self.updatedRows.update(self.dynamicDB[item])
 
         # Save all updates (replaced columns go here), deletes, and insertions
         self.maximumPosition = OutputFile.\
@@ -236,17 +244,26 @@ class pistolShrimpStore:
         # is in the item, then we rename that column by deleting that entry
         # and then rewriting that entry with the new name.
         for each in self.dynamicDB:
-            if col1 in self.dynamicDB[each]['data']:
+            if col1 in self.dynamicDB[each]['data'] and \
+                      self.dynamicDB[each]['isFree'] == 'false':
                 counter += 1
+                oldRow = json.dumps(self.dynamicDB[each])
                 reassigned = self.dynamicDB[each]['data'][col1]
                 del self.dynamicDB[each]['data'][col1]
                 self.dynamicDB[each]['data'][col2] = reassigned
+                if each in self.insertedRows:
+                    self.insertedRows[each]['data'][col2] = reassigned
+                else:
+                    self.updatedRows.update({each: self.dynamicDB[each]})
+                    if each not in self.replacedRows:
+                        self.replacedRows.update({each:
+                                         ast.literal_eval(oldRow)})
         # The following only occurs if the original column name is
         # not in the store
         if counter == 0:
             print("The first column you specified does not exist! Please "
                   "note the syntax is RENAME col1 col2, where col1 is the"
-                  "original column and col2 is the column name that is what"
+                  " original column and col2 is the column name that is what"
                   " you want col1 to be replaced with.")
         else:
             self.renamedColumns.append(tup)
@@ -302,7 +319,8 @@ class pistolShrimpStore:
                 # renaming, insertion, deletion, and updating happens here.
                 if handleValue is not None:
                     if type(handleValue) == renamed:
-                        self.handleRenamed(handleValue)
+                        if handleValue.original is not None:
+                            self.handleRenamed(handleValue)
                     elif type(handleValue) == Insert:
                         newRow = handleValue.handleInserts(self.dynamicDB)
                         # We keep track of all row that have been inserted since
@@ -351,10 +369,6 @@ class pistolShrimpStore:
         # If the user specified to exit or quit, we save the changes. We don't
         # use invokeSave() as that involves unnecessary updating.
         if toSave:
-            for item in self.dynamicDB:
-                for tup in self.renamedColumns:
-                    if tup.original in self.dynamicDB[item]:
-                        self.updatedRows.update(self.dynamicDB[item])
             OutputFile.saveChanges(self.isNewDBFile, self.storageFile, self.dynamicDB,
                       self.deletedKeys, self.insertedRows, self.updatedRows,
                       self.maximumPosition)
@@ -381,8 +395,8 @@ def specifyOutputFile():
         try:
             if len(DBFile) == 0:
                 DBFile = 'PistolShrimpStoreDB.bin'
-            with open(DBFile, 'r') as file:
-                file.read()
+            with open(DBFile, 'w') as file:
+                read = True
         except IOError:
             # In the case the file cannot be created, the user is
             # asked if they changed their mind and want to use the
@@ -473,8 +487,9 @@ if __name__ == "__main__":
 
     DBFile = specifyOutputFile()
 
-    pSStore = pistolShrimpStore(DBFile, initialDB, toCreateDBFile, maxPosition,
-                                setOfTypes)
+    pSStore = pistolShrimpStore(DBFile, initialDB, toCreateDBFile
+                                or (DBFile == inputFileInstance.filename),
+                                maxPosition, setOfTypes)
 
     pSStore.run()
 

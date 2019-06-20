@@ -97,31 +97,6 @@ def handleSelects(matches, dynamicDB):
                               json.dumps(dynamicDB[item]['data']) + '}' + '\n'
         else:
             error = True
-    elif (len(matches) == 2) or (len(matches) == 4 and
-                                 matches[2].lower() == 'from' and
-                                 matches[3].lower() == 'all'):
-        # This is specifically for selecting for a specific key
-        if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()]\
-                    ['isFree'] == 'false':
-            print(dynamicDB[matches[1].lower()]['data'], '\n')
-        else:
-            # This is specifically selecting for all columns or inner keys
-            # in the key value store, a trivial project!
-            copy = {'data': dynamicDB}
-            # The parser will find any descendant of the key value store's data
-            # that is a key in any row.
-            # that is a key in any row.
-            some_str = "data.." + matches[1]
-            expr = parse(some_str)
-            vals = set()
-            # Each match is added to a set, which is written to a buffer, then
-            # written to a file or terminal output.
-            for match in expr.find(copy):
-                vals.add(str(match.value))
-            toWrite += str(list(vals))
-            new_input = 'trivials.txt'
-            if toWrite == '':
-                print("The key or column key is not in the store!")
     elif matches[1].lower() == 'where' and len(matches) >= 4:
         # This refers to cases 5 and 6.
         listOfKeys = []
@@ -137,8 +112,39 @@ def handleSelects(matches, dynamicDB):
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
+    #elif (len(matches) == 2) or (len(matches) == 4 and
+    #                             matches[2].lower() == 'from' and
+    #                             matches[3].lower() == 'all'):
     else:
-        error = True
+        # This is specifically for selecting for a specific key
+        if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()]\
+                    ['isFree'] == 'false':
+            print(dynamicDB[matches[1].lower()]['data'], '\n')
+        else:
+            if (matches[-2].lower() == 'from' and matches[-1].lower() == 'all'):
+                matches = matches[:-2]
+            matches = matches[1:]
+            matches = " ".join(matches)
+            # This is specifically selecting for all columns or inner keys
+            # in the key value store, a trivial project!
+            copy = {'data': dynamicDB}
+            # The parser will find any descendant of the key value store's data
+            # that is a key in any row.
+            # that is a key in any row.
+            anElem = json.dumps(matches)
+            some_str = "data.." + anElem
+            expr = parse(some_str)
+            vals = set()
+            # Each match is added to a set, which is written to a buffer, then
+            # written to a file or terminal output.
+            for match in expr.find(copy):
+                vals.add(str(match.value))
+            toWrite += str(list(vals))
+            new_input = 'trivials.txt'
+            if toWrite == '':
+                print("Either the key or column key is not in the store, "
+                      "your format is invalid, or something is not"
+                      "quite implemented!")
     # Print or write the results to the terminal or a file
     if toWrite != '':
         SharedFunctions.printSelectsSearches(new_input, toWrite)
