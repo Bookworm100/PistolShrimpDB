@@ -1,6 +1,6 @@
 # Challenges
 
-There are a list of challeges I encountered while doing this project.
+There are a list of challenges I encountered while doing this project.
 1. This is the first computer science project I completed from start to finish by myself completely from scratch, so I was unfamiliar with the process and how much I could actually accomplish in a week, or even 10 weeks, so I had a little trouble coming up with an idea I knew I could finish in a short amount of time.
 2. As a result, I initially implemented this project in a single module, not realizing how quickly this became unwieldy. It seems obvious now, but I had to balance this project with a tough courseload, so some aspects such as common sense fell by the wayside.
 3. This meant the end of term was very rough for me even though my features were working as I had to refactor most of my code into separate modules and classes.

@@ -1,6 +1,7 @@
 # Setting up
 
 This will tell you how to set up the key value store! Yay!
+(Note: This has been only tested on Windows, but as far as I know it should work on all OSes)
 
 1. Make sure you have Python 3.6+
 2. Retrieve the files from this GitHub repository - namely those titled PistolShrimpStoreDB.

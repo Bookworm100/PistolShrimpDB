@@ -24,7 +24,6 @@ import Search
                             and finding correctly.
 
     Functions: 
-
         handleFileInput - The user is asked to specify a file to load the data
                           from, and then places to load the data and columns
                           (which is always optional).
@@ -35,9 +34,6 @@ import Search
         main - Runs the main engine by calling handleFileInput, then creates
                the instances of InputFile and PistolShrimpStore, which handles 
                nearly all the following work.
-               
-        
-        
 """
 
 
@@ -45,8 +41,8 @@ class renamed:
     """ A tuple of the original and new names of a specific column.
 
     Variables:
-    original - the original name
-    new - the new name of the renamed column
+    original -- the original name
+    new -- the new name of the renamed column
     """
 
     def __init__(self, col1, col2):
@@ -55,43 +51,41 @@ class renamed:
 
 class pistolShrimpStore:
     """ pistolShrimpStore represents the key value store and everything necessary
-        to keep the value store inserting, deleting, updating, selecting,
-        searching, and finding correctly.
+    to keep the value store inserting, deleting, updating, selecting,
+    searching, and finding correctly.
 
-       Variables:
-       dynamicDB - the key value store that is all the fuss
-       storageFile - the storage file that will be written to
-       insertedRows - the maintained dictionary of every insertedRow
-                      since the last save/undo or opening of the program
-       deletedKeys - the list of every deleted key since the last save/undo or
-                     opening of the program
-       updatedRows - the dictionary of every updated row since the last
-                     save/undo or opening of the program
-       replacedRows - the dictionary of replacedRow objects since the last
-                      save/undo or opening of the program (from update)
-       renamedColumns - the list of renamed column objects with the original
-                        and renamed names
-       maximumPosition - the maintained maximum position used to write to the
-                         storage file when adding inserting rows.
-       isNewDBFile - the flag indicating if this is a new dbfile
-       typesSet - the set of column types currently in existence
+    Variables:
+    dynamicDB -- the key value store that is all the fuss
+    storageFile -- the storage file that will be written to
+    insertedRows -- the maintained dictionary of every insertedRow
+                    since the last save/undo or opening of the program
+    deletedKeys -- the list of every deleted key since the last save/undo or
+                   opening of the program
+    updatedRows -- the dictionary of every updated row since the last
+                   save/undo or opening of the program
+    replacedRows -- the dictionary of replacedRow objects since the last
+                    save/undo or opening of the program (from update)
+    renamedColumns -- the list of renamed column objects with the original
+                      and renamed names
+    maximumPosition -- the maintained maximum position used to write to the
+                       storage file when adding inserting rows.
+    isNewDBFile -- the flag indicating if this is a new dbfile
+    typesSet -- the set of column types currently in existence
 
-       Functions:
-       handleInput: passes the input to instaances of Update, Delete, Insert,
-                    Search, and Select
-       reset: resets the values of insertedRows, deletedKeys, updatedRows,
-              replacedRows, and renamedColumns after a save/undo.
-       invokeUndo: Reverts all changes to dynamicDB since the last save/undo or
-                   opening of the file, and then calls reset
-       invokeSave: Saves all changes to dynamicDB to the storage file since the
-                   last save/undo or opening of the file, and then calls reset
-       handleRenamed: renames all the columns in dynamicDB and saves the
-                      renamedObject in case of undo.
-       run: The main program function of the file, and invokes input, and
-            handles any action (such as to turn the input to handleInputs
-            or to exit the program)
-
-
+    Functions:
+    handleInput: passes the input to instaances of Update, Delete, Insert,
+                 Search, and Select
+    reset: resets the values of insertedRows, deletedKeys, updatedRows,
+           replacedRows, and renamedColumns after a save/undo.
+    invokeUndo: Reverts all changes to dynamicDB since the last save/undo or
+                opening of the file, and then calls reset
+    invokeSave: Saves all changes to dynamicDB to the storage file since the
+                last save/undo or opening of the file, and then calls reset
+    handleRenamed: renames all the columns in dynamicDB and saves the
+                   renamedObject in case of undo.
+    run: The main program function of the file, and invokes input, and
+         handles any action (such as to turn the input to handleInputs
+         or to exit the program)
     """
 
     def __init__(self, storageFile, dynamicDB, isNewDBFile, maximumPosition,
@@ -120,14 +114,15 @@ class pistolShrimpStore:
         while also returning nothing.
 
         Keyword Argument:
-        command, the raw command passed in by the user
+        command -- the raw command passed in by the user
 
         Return values:
-         changesMade - an object of type Insert, Delete, Update, Rename,
-         or None depending on which command the input was to execute.
-         The object will be used to update dynamicDB and any variables
-         used to keep track of changes for save/undo purposes.
-         """
+        changesMade -- an object of type Insert, Delete, Update, Rename,
+                       or None depending on which command the input was to
+                       execute. The object will be used to update dynamicDB and
+                       any variables used to keep track of changes for
+                       save/undo purposes.
+        """
 
         # check the inputs
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+={}():\'",]+', re.IGNORECASE)
@@ -150,8 +145,9 @@ class pistolShrimpStore:
         return changesMade
 
     def reset(self):
-        """resets the values of insertedRows, deletedKeys, updatedRows,
-              replacedRows, and renamedColumns after a save/undo.
+        """ Resets the values of insertedRows, deletedKeys, updatedRows,
+        replacedRows, and renamedColumns after a save/undo.
+
         No Keyword Arguments or return values
         """
 
@@ -165,9 +161,10 @@ class pistolShrimpStore:
 
 
     def invokeUndo(self):
-        """Reverts any changes made to dynamicDB since the last save/undo
-           or loading of the program.
-           No Keyword Arguments or return values
+        """ Reverts any changes made to dynamicDB since the last save/undo
+        or loading of the program.
+
+        No Keyword Arguments or return values
         """
 
         # Delete any added row
@@ -199,6 +196,7 @@ class pistolShrimpStore:
 
         No Keyword Arguments or return values
         """
+
         # TODO: Test this
         # Add renamed values to updated rows
         for item in self.dynamicDB:
@@ -229,6 +227,7 @@ class pistolShrimpStore:
 
         No return values
         """
+
         col1 = handleValue.original
         col2 = handleValue.new
         tup = (col1, col2)
@@ -369,8 +368,9 @@ def specifyOutputFile():
     No keyword arguments
 
     Return values:
-    DBFile - the name of the output file to use
+    DBFile -- the name of the output file to use
     """
+
     DBFile = input("If you would like to specify "
                    "a file to write to, type it here, else, hit enter."
                    "\n")
@@ -404,9 +404,9 @@ def handleFileInput():
     No keyword arguments
 
     Return values:
-    toLoadFile - the file to load data from
-    whereKey - a keyword specifying where to possibly find column information
-    whereData - a keyword specifying where to possibly find data
+    toLoadFile -- the file to load data from
+    whereKey -- a keyword specifying where to possibly find column information
+    whereData -- a keyword specifying where to possibly find data
     """
 
     # Let the user specify which file to use
@@ -455,7 +455,7 @@ if __name__ == "__main__":
     output file. Finally, we set up an instance of pistolShrimpStore, which
     is used for all the remaining work.
     Note: This only works in Python 3.6+. Otherwise, we would need to use
-    something like orderedDict.
+    something like orderedDict for the key value store.
     
     No keyword arguments or return values 
     """

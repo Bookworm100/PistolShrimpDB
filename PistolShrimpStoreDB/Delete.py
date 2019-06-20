@@ -13,16 +13,15 @@ class Delete:
        processing input.
 
        Variables:
-       matches - the passed in raw input from handleInput
-       selectedKeys - the list of keys to delete
-       typesSet - the current set of all currently held column types
+       matches -- the passed in raw input from handleInput
+       selectedKeys -- the list of keys to delete
+       typesSet -- the current set of all currently held column types
 
        Functions:
        handleDeletes: parses matches to input used to delete an existing row
                       (if the key and its value don't exist, we print an error
                       message instead).
-
-       """
+    """
 
     def __init__(self, matches, typesSet):
         self.matches = matches
@@ -31,7 +30,8 @@ class Delete:
 
     def handleDeletes(self, dynamicDB):
         """ handleDeletes handles all information relating to deletes, including
-                 processing input.
+        processing input.
+
         handleDeletes passes either a key or a set of values to the function
         marking keys for deletion. The matches generated using regex are used
         for this purpose. If a key is not in the store, then a message
@@ -40,10 +40,11 @@ class Delete:
         a usage is printed out, and the current operation is abandoned.
 
         Keyword Arguments:
-        dynamicDB - the key value store maintained in the program
+        dynamicDB -- the key value store maintained in the program
 
         Return values:
-        selectedKeys, the list of keys that we delete from the store. """
+        selectedKeys, the list of keys that we delete from the store.
+        """
 
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
         matches = parser.findall(" ".join(self.matches))

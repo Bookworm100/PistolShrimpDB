@@ -17,34 +17,34 @@ class inputFile:
     """ inputFile Class holds all information relating to the input file,
     especially the initial loading of either a json file or existing storage file
 
-       Variables:
-       filename - the name of the file to load
-       dynamicDB - the key value store to be initially set up
-       isNewDBFile - a flag indicating if a storage file needs to be entirely
-                     written. In the case the storage file already exists,
-                     adding a new Json file will overwrite it in case the user
-                     wants to load in a new dataset.
-       maximumPosition - an integer value indicating whether the row is part of
-                         the storage file already (for JSON files that are
-                         loaded), the maximumPosition for any row will not exist.
-       whereKey - a marker of where to look for column/key types
-       whereData - a marker of where to look for data
-       typesSet - a list of column types that are loaded
-       name - the name of the file to be loaded without its location
-       type - the location of the file to be loaded
+    Variables:
+    filename -- the name of the file to load
+    dynamicDB -- the key value store to be initially set up
+    isNewDBFile -- a flag indicating if a storage file needs to be entirely
+                   written. In the case the storage file already exists,
+                   adding a new Json file will overwrite it in case the user
+                   wants to load in a new dataset.
+    maximumPosition -- an integer value indicating whether the row is part of
+                      the storage file already (for JSON files that are
+                      loaded), the maximumPosition for any row will not exist.
+    whereKey -- a marker of where to look for column/key types
+    whereData -- a marker of where to look for data
+    typesSet -- a list of column types that are loaded
+    name -- the name of the file to be loaded without its location
+    type -- the location of the file to be loaded
 
-       Functions:
-       findTheData: locates a source of data (either through a keyword specified
-                    or through looking for the largest length of text in the
-                    highest level dictionary or list)
-       retrieveColumnsData: locates the columns by using a keyword specified by
-                            the user if they wish or use a default labeling, and
-                            calls find the data, and they retrieve the column
-                            labels and data to use
-       setupDatabase: sets up the initial key value store if it doesn't exist
-       loadFile: loads either the existing storage file or a JSON file specified
-                 and in doing so, sets up the intiial key value store
-       """
+    Functions:
+    findTheData: locates a source of data (either through a keyword specified
+                 or through looking for the largest length of text in the
+                 highest level dictionary or list)
+    retrieveColumnsData: locates the columns by using a keyword specified by
+                         the user if they wish or use a default labeling, and
+                         calls find the data, and they retrieve the column
+                         labels and data to use
+    setupDatabase: sets up the initial key value store if it doesn't exist
+    loadFile: loads either the existing storage file or a JSON file specified
+              and in doing so, sets up the intiial key value store
+    """
 
     def __init__(self, name, whereKey, whereData):
         self.filename = name
@@ -67,11 +67,12 @@ class inputFile:
         element in the dictionary or list.
 
         Keyword arguments:
-        measurements - the loaded JSON data
+        measurements -- the loaded JSON data
 
         Return values:
-        data - the viable data set extracted from the JSON file
+        data -- the viable data set extracted from the JSON file
         """
+
         data = None
         if self.whereData in measurements or self.whereData != 'data':
             # We search for data in the loaded JSON data
@@ -133,14 +134,14 @@ class inputFile:
         5. If not 4, then set the column names to be default values.
 
         Keyword Arguments:
-        measurements - the loaded JSON data
+        measurements -- the loaded JSON data
 
         Return values:
-        (data, skipItems) - the obtained data and skipItems, a value indicating
-                            number of items to skip (if possible), which is
-                            usually metadata
-
+        (data, skipItems) -- the obtained data and skipItems, a value indicating
+                             number of items to skip (if possible), which is
+                             usually metadata
         """
+
         # Search for the list of columns using jsonpath_ng's parse
         skipItems = 0
 
@@ -182,8 +183,9 @@ class inputFile:
 
 
     def setUpDatabase(self):
-        """setUpDatabase initilizes the key value store from an existing JSON
+        """ setUpDatabase initializes the key value store from an existing JSON
         file.
+
         Specifically, the data is stored in a dictionary, which holds
         a tag specifying if the block is free and can be overwritten (which is
         initialized to false). Other items stored in the values itself is a
@@ -195,8 +197,8 @@ class inputFile:
         No keyword arguments as everything is derived from class
 
         Return value:
-        measurementStore -  the newly set up key value store, to be
-                  dynamicDB (see loadFile)
+        measurementStore -- the newly set up key value store, to be
+                            dynamicDB (see loadFile)
         """
 
         # Open and load the file (the with clause ensures the file closes,
@@ -246,13 +248,13 @@ class inputFile:
         No keyword arguments as everything is derived from class
 
         Return values:
-        dynamicDB -  the key value store maintained in the program
-                  that is now setup and initialized by the program
-        isNewDBFile -  a false value indicating that if the file
-                  did not exist earlier, it now does
-        maximumPosition - the final position in the file, incremented
-                 with each inserted row
-        typesSet - the set of all different column types in existence to
+        dynamicDB -- the key value store maintained in the program
+                     that is now setup and initialized by the program
+        isNewDBFile -- a false value indicating that if the file
+                       did not exist earlier, it now does
+        maximumPosition -- the final position in the file, incremented
+                           with each inserted row
+        typesSet -- the set of all different column types in existence to
                    be maintained
         """
 

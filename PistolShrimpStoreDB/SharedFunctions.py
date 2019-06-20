@@ -34,7 +34,7 @@ import re
 
 
 def spaceMatches(index, matches):
-    """For commands without ands/ors, spaceMatches is used to separate out
+    """ For commands without ands/ors, spaceMatches is used to separate out
     individual types and values, especially if they contain spaces.
 
     A regex parser is used to include whitespace but not ',' or '=', so matches
@@ -70,7 +70,7 @@ def spaceMatches(index, matches):
 
 
 def conjMatches(index, matches):
-    """For commands with ands/ors, conjMatches is used to separate out
+    """ For commands with ands/ors, conjMatches is used to separate out
     individual types and values, especially if they contain spaces.
 
     A regex parser is used to include whitespace and splits by ors and then
@@ -208,8 +208,8 @@ def doesColumnTypeValueMatch(key, values, filterItems):
     filterItems -- The key value store
 
     Return values:
-    meetsAllAnds - a Boolean flag indicating whether the specific row meets the
-                   criteria, indicating whether or not to select that row
+    meetsAllAnds -- a Boolean flag indicating whether the specific row meets
+                    the criteria, indicating whether or not to select that row
     """
 
     meetsAllAnds = True

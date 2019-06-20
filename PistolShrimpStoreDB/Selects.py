@@ -20,42 +20,42 @@ def handleSelects(matches, dynamicDB):
         statements.
 
     This should handle anything
-     with selects. Either completed or very, very close to completion.
-     So far, The trivial selects are 1. SELECT * or SELECT * FROM KEYS,
-     which writes keys to a file. All this involves is looping through
-     the key value store dictionary in the running program and printing
-     every key to a text file (printing directly to terminal might be a
-     little problematic as there is a lot of data).
-     2. SELECT * FROM VALUES, which prints just all values to a text file.
-     This involves looping through the key-value store stored in the
-     dictionary and writing all values to a text file.
-     3. SELECT * FROM ALL which prints all values to a text file. This
-     involves looping through the key-value dictionary and printing all
-     the keys and all their corresponding values.
-     4. SELECT [key] or SELECT [key] FROM ALL involves
-     printing the value corresponding to a given key to the console. All
-     this involves is first inquiring if the key is in the dictionary, and
-     then if it is, then printing out its corresponding value.
-     5. SELECT WHERE col=tag, col2=tag2, etc. The printing is done in
-     SharedFunctions.printSelectsSearches, but the information to be written
-     is determined in this
-     function, as is the default file name to be printed, which is passed to
-     printSelectsSearches.
-     6. SELECT WHERE col=tag AND/OR col2=tag2 AND/OR etc. The printing is done in
-     SharedFunctions.printSelectsSearches, but the information to be written
-     is determined in this
-     function, as is the default file name to be printed, which is passed to
-     printSelectsSearches.
-     7. SELECT [anyKey] or SELECT [anyKey] FROM ALL. This examines each row
-     in the key value stores and prints every value associated with the key
-     provided.
+    with selects. Either completed or very, very close to completion.
+    So far, The trivial selects are 1. SELECT * or SELECT * FROM KEYS,
+    which writes keys to a file. All this involves is looping through
+    the key value store dictionary in the running program and printing
+    every key to a text file (printing directly to terminal might be a
+    little problematic as there is a lot of data).
+    2. SELECT * FROM VALUES, which prints just all values to a text file.
+    This involves looping through the key-value store stored in the
+    dictionary and writing all values to a text file.
+    3. SELECT * FROM ALL which prints all values to a text file. This
+    involves looping through the key-value dictionary and printing all
+    the keys and all their corresponding values.
+    4. SELECT [key] or SELECT [key] FROM ALL involves
+    printing the value corresponding to a given key to the console. All
+    this involves is first inquiring if the key is in the dictionary, and
+    then if it is, then printing out its corresponding value.
+    5. SELECT WHERE col=tag, col2=tag2, etc. The printing is done in
+    SharedFunctions.printSelectsSearches, but the information to be written
+    is determined in this
+    function, as is the default file name to be printed, which is passed to
+    printSelectsSearches.
+    6. SELECT WHERE col=tag AND/OR col2=tag2 AND/OR etc. The printing is done in
+    SharedFunctions.printSelectsSearches, but the information to be written
+    is determined in this
+    function, as is the default file name to be printed, which is passed to
+    printSelectsSearches.
+    7. SELECT [anyKey] or SELECT [anyKey] FROM ALL. This examines each row
+    in the key value stores and prints every value associated with the key
+    provided.
 
-     Keyword arguments:
-     matches - a list of strings of words
-     dynamicDB - the key value store maintained in the program
+    Keyword arguments:
+    matches -- a list of strings of words
+    dynamicDB -- the key value store maintained in the program
 
-     No return values
-     """
+    No return values
+    """
 
     equalMatches = matches
     parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)

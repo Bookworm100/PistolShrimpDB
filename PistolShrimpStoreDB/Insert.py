@@ -13,20 +13,19 @@ import SharedFunctions
 
 class Insert:
     """ Insert Class holds all information relating to inserts, including
-       processing input.
+    processing input.
 
-       Variables:
-       matches - the passed in raw input from handleInput
-       insertedRow - the new row we add to the key value store
-       typesSet - the current set of all currently held column types
+    Variables:
+    matches -- the passed in raw input from handleInput
+    insertedRow -- the new row we add to the key value store
+    typesSet -- the current set of all currently held column types
 
-       Functions:
-       generateRandomKey: Generates a random key if the user does not supply
-                          one or the user supplied one exists in the store
-       generateNewRows: Creates a new row/entry based on either a user supplied key
-       handleInserts: parses matches to input used to insert a new row
-
-       """
+    Functions:
+    generateRandomKey: Generates a random key if the user does not supply
+                       one or the user supplied one exists in the store
+    generateNewRows: Creates a new row/entry based on either a user supplied key
+    handleInserts: parses matches to input used to insert a new row
+    """
 
     def __init__(self, matches, typesSet):
         self.matches = matches
@@ -43,7 +42,7 @@ class Insert:
         No keyword arguments
 
         Return values:
-        key - a randomly generated key
+        key -- a randomly generated key
         """
 
         key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
@@ -59,10 +58,10 @@ class Insert:
         store.
 
         Keyword Argument:
-        colValList - a list of the parameters for the new row
+        colValList -- a list of the parameters for the new row
 
         Return values:
-        newValues - the inserted row (with a randomly generated key)
+        newValues -- the inserted row (with a randomly generated key)
         """
 
         # check that all columns are valid
@@ -89,22 +88,22 @@ class Insert:
 
     def handleInserts(self, dynamicDB):
         """ handleInserts returns a newly generated row to be inserted to the
-         store.
+        store.
 
-         First, the function passes a set of matches generated using regex. If
-         a key is in the store, then a message explaining this is printed out
-         and a random key is generated instead.
-         If the format is incorrect (not
-         as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….),
-         INSERT VALUES (col=tag, col2=tag2, col3=tag3…),
-         a usage is printed out, and the current operation is abandoned.
+        First, the function passes a set of matches generated using regex. If
+        a key is in the store, then a message explaining this is printed out
+        and a random key is generated instead.
+        If the format is incorrect (not
+        as INSERT [key] WITH VALUES (col=tag, col2=tag2, col3=tag3….),
+        INSERT VALUES (col=tag, col2=tag2, col3=tag3…),
+        a usage is printed out, and the current operation is abandoned.
 
-         Keyword Arguments:
-         dynamicDB - the key value store maintained in the program
+        Keyword Arguments:
+        dynamicDB -- the key value store maintained in the program
 
-         Return values:
-         self.insertedrow, the row we are inserting
-         """
+        Return values:
+        self.insertedrow -- the row we are inserting
+        """
 
         key = ''
         values = {}
@@ -140,7 +139,3 @@ class Insert:
         if values != {}:
             self.insertedRow = {key: {'isFree': 'false', 'data': values}}
         return self.insertedRow
-
-
-
-

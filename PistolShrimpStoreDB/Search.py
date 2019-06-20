@@ -135,7 +135,6 @@ def searchFilter(findInKeys, findInVals, matches, usage, dynamicDB,
     limit -- the ratioDistance limit for the find option. By default, it is
              arbitrarily set to 0.8.
 
-
     Return values:
     toWrite -- the buffer to which selected keys' information is written
     """
@@ -197,37 +196,37 @@ def searchFilter(findInKeys, findInVals, matches, usage, dynamicDB,
 
 
 def handleSearches(matches, dynamicDB, isFind=False):
-    """handleSearches handles all the commands relating to search and find.
+    """ handleSearches handles all the commands relating to search and find.
 
-     There are 8 options for handling searches and finds. These are of the form:
-     1. VALUES(col=tag, col2=tag2, col3=tag3….),
-     2. VALUES(pattern1, pattern2, pattern3),
-     3. KEY AND VALUES(pattern1, pattern2, pattern3),
-     4. KEY (pattern1, pattern2,…),
-     5. VALUES(col=tag AND/OR col2=tag2 AND/OR col3=tag3….),
-     6. VALUES(pattern1 AND/OR pattern2 AND/OR pattern3)
-     7. KEY AND VALUES(pattern1 AND/OR pattern2 AND/OR pattern3),
-     8. KEY (pattern1 AND/OR pattern2 AND/OR…),
+    There are 8 options for handling searches and finds. These are of the form:
+    1. VALUES(col=tag, col2=tag2, col3=tag3….),
+    2. VALUES(pattern1, pattern2, pattern3),
+    3. KEY AND VALUES(pattern1, pattern2, pattern3),
+    4. KEY (pattern1, pattern2,…),
+    5. VALUES(col=tag AND/OR col2=tag2 AND/OR col3=tag3….),
+    6. VALUES(pattern1 AND/OR pattern2 AND/OR pattern3)
+    7. KEY AND VALUES(pattern1 AND/OR pattern2 AND/OR pattern3),
+    8. KEY (pattern1 AND/OR pattern2 AND/OR…),
 
-     If the input does not match any format, then
-     a message with the USAGE and the invalid format
-     is printed out. Depending on the format used,
-     SharedFuncions.printSelectsSearchResult is called with
-     four arguments:
-     whether the user is specifying to search in keys,
-     whether the user is specifying to search in values,
-     a list of the column tags the user wants to search in
+    If the input does not match any format, then
+    a message with the USAGE and the invalid format
+    is printed out. Depending on the format used,
+    SharedFuncions.printSelectsSearchResult is called with
+    four arguments:
+    whether the user is specifying to search in keys,
+    whether the user is specifying to search in values,
+    a list of the column tags the user wants to search in
     (only non empty in option 1), and a list of
-     the patterns to be matched on.
+    the patterns to be matched on.
 
-     Keyword arguments:
-     matches -- a list of strings of words
-     dynamicDB -- the key value store maintained in the program
-     isFind -- whether the user used a Find Command instead of search. By
+    Keyword arguments:
+    matches -- a list of strings of words
+    dynamicDB -- the key value store maintained in the program
+    isFind -- whether the user used a Find Command instead of search. By
               default it is false.
 
-     No return values
-     """
+    No return values
+    """
 
     # Cases 1, 2, 5, 6
     matches = matches[1:]

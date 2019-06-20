@@ -14,17 +14,17 @@ class Update:
     processing input.
 
     Variables:
-    matches - the passed in raw input from handleInput
-    updatedRow - the new row we update its corresponding key with
-    replacedRow - the row that was replaced (had its information updated)
-    typesSet - the current set of all currently held column types
+    matches -- the passed in raw input from handleInput
+    updatedRow -- the new row we update its corresponding key with
+    replacedRow -- the row that was replaced (had its information updated)
+    typesSet -- the current set of all currently held column types
 
     Functions:
     handleUpdates: parses matches to input used to update an existing row
                    (if the key and its value don't exist, we print an error
                    message instead).
-
     """
+
     def __init__(self, matches, typesSet):
         self.matches = matches
         self.updatedRow = {}
@@ -40,10 +40,15 @@ class Update:
         with the key. Other irregularities causing abandonment of modification
         include the type not being in the set of accepted types, and having
         tags/values without the other.
-        dynamicDB - the key value store maintained in the program
-        self.updatedRow, self.replacedRow - the tuple of a new row to update
-                                            with, and the row to be replaced
+
+        Keyword Argument:
+        dynamicDB -- the key value store maintained in the program
+
+        Return Values:
+        self.updatedRow, self.replacedRow -- the tuple of a new row to update
+                                             with, and the row to be replaced
         """
+
         error = False
         usage = "Usage:\n UPDATE [key] WITH  VALUES (col=tag, col2=tag2...) \n"
         parser = re.compile(r'[a-z-0-9*!@#$%^&~_.+{}:\'"]+', re.IGNORECASE)
