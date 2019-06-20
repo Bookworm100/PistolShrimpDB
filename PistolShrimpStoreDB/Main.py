@@ -28,6 +28,9 @@ import Search
         handleFileInput - The user is asked to specify a file to load the data
                           from, and then places to load the data and columns
                           (which is always optional).
+                          
+        specifyOutputFile - determines the output file to write to, and gives
+                            the option to specify an output file
         
         main - Runs the main engine by calling handleFileInput, then creates
                the instances of InputFile and PistolShrimpStore, which handles 
@@ -358,6 +361,39 @@ class pistolShrimpStore:
                       self.maximumPosition)
 
 
+def specifyOutputFile():
+    """ specifyOutputFile determines the output file to write to.
+    Until we know that a selected file is valid, we keep prompting the
+    user to either specify an output file or to use the default version.
+
+    No keyword arguments
+
+    Return values:
+    DBFile - the name of the output file to use
+    """
+    DBFile = input("If you would like to specify "
+                   "a file to write to, type it here, else, hit enter."
+                   "\n")
+
+    # Make sure the output file is valid.
+    read = False
+    while not read:
+        try:
+            if len(DBFile) == 0:
+                DBFile = 'PistolShrimpStoreDB.bin'
+            with open(DBFile, 'r') as file:
+                file.read()
+        except IOError:
+            # In the case the file cannot be created, the user is
+            # asked if they changed their mind and want to use the
+            # default file instead.
+            DBFile = input("Sorry, this path seems to be invalid."
+                           " Would you still like to create a custom file? "
+                           " Again, type its name here, else, hit enter.\n")
+
+    return DBFile
+
+
 def handleFileInput():
     """ This function asks for and processes user input of file types and
     data/column information keywords.
@@ -382,7 +418,7 @@ def handleFileInput():
 
     print("Loading...\n")
     if len(toLoadFile) == 0:
-        toLoadFile = "PistolShrimpDB.bin"
+        toLoadFile = "PistolShrimpStoreDB.bin"
 
     while not os.path.isfile(toLoadFile):
         toLoadFile = input("We're sorry! This file does not seem to exist " +
@@ -435,11 +471,7 @@ if __name__ == "__main__":
     initialDB, toCreateDBFile, maxPosition, setOfTypes \
         = inputFileInstance.loadFile()
 
-    DBFile = input("If you would like to specify "
-                   "a file to write to, type it here else, hit enter."
-                   "\n")
-    if len(DBFile) == 0:
-        DBFile = 'PistolStorageDB.bin'
+    DBFile = specifyOutputFile()
 
     pSStore = pistolShrimpStore(DBFile, initialDB, toCreateDBFile, maxPosition,
                                 setOfTypes)

@@ -21,9 +21,10 @@ class Insert:
        typesSet - the current set of all currently held column types
 
        Functions:
-       generateRandomKey:
-       generateNewRows:
-       handleUpdates: parses matches to input used to insert a new row
+       generateRandomKey: Generates a random key if the user does not supply
+                          one or the user supplied one exists in the store
+       generateNewRows: Creates a new row/entry based on either a user supplied key
+       handleInserts: parses matches to input used to insert a new row
 
        """
 

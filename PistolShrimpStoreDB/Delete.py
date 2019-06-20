@@ -9,7 +9,7 @@ import SharedFunctions
 
 
 class Delete:
-    """ Update Class holds all information relating to updates, including
+    """ Delete Class holds all information relating to deletes, including
        processing input.
 
        Variables:

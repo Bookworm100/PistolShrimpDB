@@ -8,7 +8,8 @@ import re
     Functions: 
     
         spaceMatches - Used to separate out column types and values in commands
-                       (Used in Delete.py, Insert.py, Search.py, Selects.py, Update.py)
+                       with commas (Used in Delete.py, Insert.py, Search.py, 
+                       Selects.py, Update.py)
                        
         conjMatches - Used to separate out column types and values in commands
                       containing ands and ors (Used in Delete.py, Search.py, Select.py)

@@ -1,5 +1,5 @@
 # Usage
-This is a list of all commands you need (so far) to operate this key-value store. There is also a list of commands I hope to implement in the coming weeks :)
+This is a list of all commands you need (so far) to operate this key-value store. Note: for the operations allowing ands/ors, ands have precedence over ors.
 
 ## Basic commands:
 1. save
@@ -36,13 +36,17 @@ If the format does not match as specified, you will be shown the usage of the sp
 - SELECT [key] FROM ALL
 	- Selects the row corresponding to the given key. If the key is not in the store, the program will say so!
 - SELECT WHERE (col=val, col2=val2,...)
-	- Selects the row meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
+	- Selects the rows meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
 	- For example: SELECT WHERE measureId=84, stateId=1, countyId=1101, year=1999, measurement=3353220
 	- You can subtract variables to yield more results!
+- SELECT WHERE (col=val AND/OR col2=val2 AND/OR...)
+	- Selects the rows meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
 3. Deletes:
 - DELETE [key]
 	- Deletes the row corresponding to the given key. If the key is not in the store, the program will say so!
 - DELETE VALUES (col=val, col2=val2, col3=val3...)
+	- Deletes the row meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
+- DELETE VALUES (col=val AND/OR col2=val2 AND/OR col3=val3...)
 	- Deletes the row meeting all the criteria given by the columns and values. If nothing matches the criteria, the program will say so!
 4. Updates: UPDATE [key] VALUES (col=val, col2=val2, col3=val3...) 
 	- Updates the row corresponding to the given key with the new values in the columns. If the key is not in the store, the program will say so!
@@ -57,24 +61,32 @@ If the format does not match as specified, you will be shown the usage of the sp
 	- Searches the store's rows (keys and values) for those which contain all the patterns
 - SEARCH KEY (pattern1, pattern2...)
 	- Searches the store's keys corresponding for those which contain all the patterns
+- SEARCH VALUES (col=pattern1 AND/OR col2=pattern2 AND/OR col3=pattern3...)
+	- Searches the store's values corresponding to each column type for those which are superstrings of the corresponding given pattern
+- SEARCH VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+	- Searches the store's values (per row) corresponding for those which are superstrings of the corresponding given pattern
+- SEARCH KEY AND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+	- Searches the store's rows (keys and values) for those which contain all the patterns
+- SEARCH KEY (pattern1 AND/OR pattern2...)
+	- Searches the store's keys corresponding for those which contain all the patterns
 
-## Coming soon! By 6/7/19 hopefully :)
-1. SELECTS:
-- Instead of SELECT WHERE (col=val, col2=val2,...):
-	- SELECT WHERE (col=val AND col2=val2 AND...) (which is the equivalent of the current implementation)
-	- SELECT WHERE (col=val OR col2=val2 OR ...)
-2. SEARCHES:
-	- All searches will be of the form:
-		- SEARCH VALUES (col=pattern1 AND col2=pattern2 AND col3=pattern3...)
-		- SEARCH VALUES (col=pattern1 OR col2=pattern2 OR col3=pattern3...)
-		- SEARCH VALUES (pattern1 AND pattern2 AND pattern3...)
-		- SEARCH VALUES (pattern1 OR pattern2 OR pattern3...)
-		- SEARCH KEY AND VALUES (pattern1 AND pattern2 AND pattern3...)
-		- SEARCH KEY AND VALUES (pattern1 OR pattern2 OR pattern3...)
-		- SEARCH KEY (pattern1 AND pattern2...)
-		- SEARCH KEY (pattern1 OR pattern2...)
-3. Instead of DELETE VALUES (col=val, col2=val2, col3=val3...):
-	- DELETE VALUES (col=val AND col2=val2 AND col3=val3...)
-	- DELETE VALUES (col=val OR col2=val2 OR col3=val3...)
+6. Find:
+- FIND VALUES (col=pattern1, col2=pattern2, col3=pattern3...)
+	- Searches the store's values corresponding to each column type for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND VALUES (pattern1, pattern2, pattern3...)
+	- Searches the store's values (per row) corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND KEY AND VALUES (pattern1, pattern2, pattern3...)
+	- Searches the store's rows (keys and values) for those those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND KEY (pattern1, pattern2...)
+	- Searches the store's keys corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND VALUES (col=pattern1 AND/OR col2=pattern2 AND/OR col3=pattern3...)
+	- Searches the store's values corresponding to each column type for those which are superstrings of the corresponding given pattern
+- FIND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+	- Searches the store's values (per row) corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND KEY AND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+	- Searches the store's rows (keys and values) for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
+- FIND KEY (pattern1 AND/OR pattern2...)
+	- Searches the store's keys corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
 
-- These new options will allow the options we select for match exactly 1 criteria instead of every single one that we specify.
+7. RENAME col1 col2
+	- Allows col1 to be renamed col2. This works for columns where col1 is in at least one entry in the key value store.
