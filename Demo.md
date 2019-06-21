@@ -1,6 +1,6 @@
 # Demo
 1. When prompted for an input file (as specified in Setup), you can pick any in the folder marked DemoFiles.
-2. After you select a file, you follow the setup and you can skip typing in a keyword specifying where to find the keyword for data, and a keyword specifying where to find columns. Those features are still pretty close to, but not quite working.
+2. After you select a file, you follow the setup.
 3. Then, you will be asked to specify an output file, and you can choose to specify one.
 4. Remember that at any point, you can choose to exit, quit, abort, undo, or save your commands.
 Here is a following demo for AirQualityMeasures.json as the input file (don't worry, other files takes less time to run commands. This one just happens to be pretty big):
