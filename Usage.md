@@ -1,5 +1,7 @@
 # Usage
 This is a list of all commands you need (so far) to operate this key-value store. Note: for the operations allowing ands/ors, ands have precedence over ors.
+Also, the parentheses are optional in the commands below and are shown for readibility.
+And commands are case-insensitive (mostly lower case enforced).
 
 ## Basic commands:
 1. save
@@ -71,22 +73,23 @@ If the format does not match as specified, you will be shown the usage of the sp
 	- Searches the store's keys corresponding for those which contain all the patterns
 
 6. Find:
-- FIND VALUES (col=pattern1, col2=pattern2, col3=pattern3...)
+- FIND [opt: limit] VALUES (col=pattern1, col2=pattern2, col3=pattern3...)
 	- Searches the store's values corresponding to each column type for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND VALUES (pattern1, pattern2, pattern3...)
+- FIND [opt: limit] VALUES (pattern1, pattern2, pattern3...)
 	- Searches the store's values (per row) corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND KEY AND VALUES (pattern1, pattern2, pattern3...)
+- FIND [opt: limit] KEY AND VALUES (pattern1, pattern2, pattern3...)
 	- Searches the store's rows (keys and values) for those those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND KEY (pattern1, pattern2...)
+- FIND [opt: limit] KEY (pattern1, pattern2...)
 	- Searches the store's keys corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND VALUES (col=pattern1 AND/OR col2=pattern2 AND/OR col3=pattern3...)
+- FIND [opt: limit] VALUES (col=pattern1 AND/OR col2=pattern2 AND/OR col3=pattern3...)
 	- Searches the store's values corresponding to each column type for those which are superstrings of the corresponding given pattern
-- FIND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+- FIND [opt: limit] VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
 	- Searches the store's values (per row) corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND KEY AND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
+- FIND [opt: limit] KEY AND VALUES (pattern1 AND/OR pattern2 AND/OR pattern3...)
 	- Searches the store's rows (keys and values) for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
-- FIND KEY (pattern1 AND/OR pattern2...)
+- FIND [opt: limit] KEY (pattern1 AND/OR pattern2...)
 	- Searches the store's keys corresponding for those values which, with the corresponding given pattern, compute to a difflib.SequenceMatcher.ratio() value less than a given limit
 
-7. RENAME col1 col2
+7. RENAME 'col1' 'col2'
 	- Allows col1 to be renamed col2. This works for columns where col1 is in at least one entry in the key value store.
+	- Single quotes are only for the rename option.

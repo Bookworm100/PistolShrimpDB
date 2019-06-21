@@ -26,7 +26,7 @@ import json
 
 
 def searchList(col, pattern, item1, findInKeys, findInVals,
-               filterItems, toFind=False, limit=0.8):
+               filterItems, toFind=False, limit=0.7):
     """ searchList is a helper which designates whether to include a key in a
     key collection for deletes and selects.
 
@@ -46,7 +46,7 @@ def searchList(col, pattern, item1, findInKeys, findInVals,
     toFind -- whether the user used a Find Command instead of search. By
               default it is false.
     limit -- the ratioDistance limit for the find option. By default, it is
-             arbitrarily set to 0.8.
+             arbitrarily set to 0.7.
 
     Return values:
     toInclude -- a Boolean indicating whether to include the key in the list
@@ -65,7 +65,7 @@ def searchList(col, pattern, item1, findInKeys, findInVals,
         if toFind:
             ratioDistance = difflib.SequenceMatcher(None, item1, pattern).ratio()
         predicate1 = (item1.find(pattern) != -1) \
-            or (toFind and ratioDistance > limit)
+            or (toFind and ratioDistance >= limit)
 
     # We examine if a pattern is in a key if necessary. If a column is
     # associated with the pattern, then we check only if the associated pattern
@@ -84,7 +84,7 @@ def searchList(col, pattern, item1, findInKeys, findInVals,
             # Figure out if the column type, if specified, is in the row or
             # if we want a ratioDistance from a column type/key in the row.
             predicate2 = (item2.find(col) != -1) \
-                or (toFind and ratioDistance > limit)
+                or (toFind and ratioDistance >= limit)
             checkedAColumn = predicate2 or checkedAColumn
             # If the column exists or is within a ratio distance limit,
             # then we want to check the actual value at the row, with
@@ -100,16 +100,16 @@ def searchList(col, pattern, item1, findInKeys, findInVals,
                 # predicate3 determines if the value an exact substring (for
                 # search) or within a certain ratioDistance
                 predicate3 = (item3.find(pattern) != -1) or \
-                             (toFind and ratioDistance > limit) or predicate3
+                             (toFind and ratioDistance >= limit) or predicate3
 
     # Either the value should be found in the key, or in a
     # value matching a column (if specified).
-    toInclude = predicate1 or (checkedAColumn and predicate3)
+    toInclude = predicate1 or ((checkedAColumn or col == '') and predicate3)
     return toInclude
 
 
 def searchFilter(findInKeys, findInVals, matches, usage, dynamicDB,
-                     checkColTypeVal, toFind=False, limit=0.8):
+                     checkColTypeVal, toFind=False, limit=0.7):
     """ searchFilter writes the information of keys meeting the criteria
     specified by the matches argument.
 
@@ -133,7 +133,7 @@ def searchFilter(findInKeys, findInVals, matches, usage, dynamicDB,
     toFind -- whether the user used a Find Command instead of search. By
               default it is false.
     limit -- the ratioDistance limit for the find option. By default, it is
-             arbitrarily set to 0.8.
+             arbitrarily set to 0.7.
 
     Return values:
     toWrite -- the buffer to which selected keys' information is written
@@ -249,7 +249,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
                 FIND KEY (pattern1 AND/OR pattern2 AND/OR…), \ "
     error = False
     toWrite = ''
-    limit = 0.8
+    limit = 0.7
     substringToCheck = " ".join(matches).lower()
     seeColTypeValue = '=' in substringToCheck
     # Check if the user specified a limit since it is optional
@@ -258,7 +258,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
             limit = float(matches[0].lower())
             matches = matches[1:]
         except:
-            limit = 0.8
+            limit = 0.7
     if matches[0].lower() == "values":
         # Collect column names if necessary
         matches = matches[1:]
@@ -271,7 +271,7 @@ def handleSearches(matches, dynamicDB, isFind=False):
         # If columns are called with patterns, then we separate the matches
         # out to their corresponding lists to be called in searchFilter
         # depending on whether the user specified commas or and/or
-        if "and" in substringToCheck or "or" in substringToCheck:
+        if " and " in substringToCheck or " or " in substringToCheck:
             matches = SharedFunctions.conjMatches(0, matches)
             toWrite += searchFilter(False, True, matches, usage, dynamicDB,
                                     seeColTypeValue, isFind, limit)
@@ -299,19 +299,19 @@ def handleSearches(matches, dynamicDB, isFind=False):
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key" and matches[1].lower() == "and" and\
             matches[2].lower() == "values":
-        if "and" in substringToCheck[15:] or "or" in substringToCheck:
+        if " and " in substringToCheck[15:] or " or " in substringToCheck:
             matches = SharedFunctions.conjMatches(3, matches)
         else:
             matches = SharedFunctions.spaceMatches(3, matches)
             # Match the list to be of an inner nested list of
             # anded arguments, as that is what the comma serves as
-            matches = [[[i] for i in matches]]
+            matches = [[i] for i in matches]
         toWrite += searchFilter(True, True, matches, usage, dynamicDB,
                                 seeColTypeValue, isFind, limit)
     # Case 4/8 (we are looking through keys, and the patterns are
     # are matches that are not key words specified in the clause)
     elif matches[0].lower() == "key":
-        if "and" in substringToCheck or "or" in substringToCheck:
+        if " and " in substringToCheck or " or " in substringToCheck:
             matches = SharedFunctions.conjMatches(1, matches)
         else:
             matches = SharedFunctions.spaceMatches(1, matches)

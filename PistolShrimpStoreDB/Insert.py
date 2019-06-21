@@ -23,7 +23,6 @@ class Insert:
     Functions:
     generateRandomKey: Generates a random key if the user does not supply
                        one or the user supplied one exists in the store
-    generateNewRows: Creates a new row/entry based on either a user supplied key
     handleInserts: parses matches to input used to insert a new row
     """
 
@@ -31,27 +30,6 @@ class Insert:
         self.matches = matches
         self.insertedRow = {}
         self.typesSet = typesSet
-
-    def generateRandomKey(self):
-        """ generateRandomKey generates a random key to be used when inserting
-        new values to the dictionary key value store.
-
-        This is called if the user does not specify a key to insert with or if
-        the key the user supplies is already in the key value store.
-
-        No keyword arguments
-
-        Return values:
-        key -- a randomly generated key
-        """
-
-        key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
-                                              string.digits, k=4))
-        key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
-        key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
-        key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
-        key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
-        return key
 
     def generateNewRows(self, colValList):
         """ generateNewRows creates the new values to the dictionary key value
@@ -120,7 +98,7 @@ class Insert:
                 print("Key already in key value store. Selecting new random "
                       "key instead...\n")
                 while key in dynamicDB:
-                    key = self.generateRandomKey()
+                    key = SharedFunctions.generateRandomKey()
             matches = SharedFunctions.spaceMatches(4, equalMatches)
             # This function parses the matches and generates new rows in the
             # proper format.
@@ -130,7 +108,7 @@ class Insert:
         elif matches[1].lower() == 'values' and len(matches) >= 3:
             matches = SharedFunctions.spaceMatches(2, equalMatches)
             while key in dynamicDB or key == '':
-                key = self.generateRandomKey()
+                key = SharedFunctions.generateRandomKey()
             values = self.generateNewRows(matches)
         else:
             print("Insert format is incorrect. Usage:\n INSERT [key] WITH "

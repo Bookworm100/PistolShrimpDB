@@ -50,7 +50,7 @@ class Delete:
         matches = parser.findall(" ".join(self.matches))
         # This is if the input is in the form DELETE VALUES (col=tag, col2=tag2...)
         if matches[1].lower() == 'values' and len(matches) >= 3:
-            if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+            if " and " in " ".join(matches).lower() or " or " in " ".join(matches).lower():
                 matches = SharedFunctions.conjMatches(2, self.matches)
                 self.selectedKeys += SharedFunctions.selectKeyswithAndOrs(matches, dynamicDB)
             else:

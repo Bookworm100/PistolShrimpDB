@@ -102,7 +102,7 @@ def handleSelects(matches, dynamicDB):
         listOfKeys = []
         # Ands/ors are selected for differently, but the default is to use the
         # findMatchingKeys function
-        if "and" in " ".join(matches).lower() or "or" in " ".join(matches).lower():
+        if " and " in " ".join(matches).lower() or " or " in " ".join(matches).lower():
             matches = SharedFunctions.conjMatches(2, equalMatches)
             listOfKeys += SharedFunctions.selectKeyswithAndOrs(matches, dynamicDB)
         else:
@@ -112,9 +112,6 @@ def handleSelects(matches, dynamicDB):
         for each in listOfKeys:
             toWrite += json.dumps(each) + ": " + \
                        json.dumps(dynamicDB[each]['data']) + '\n'
-    #elif (len(matches) == 2) or (len(matches) == 4 and
-    #                             matches[2].lower() == 'from' and
-    #                             matches[3].lower() == 'all'):
     else:
         # This is specifically for selecting for a specific key
         if matches[1].lower() in dynamicDB and dynamicDB[matches[1].lower()]\

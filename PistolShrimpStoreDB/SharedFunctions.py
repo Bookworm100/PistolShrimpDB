@@ -1,5 +1,7 @@
 import sys
 import re
+import random
+import string
 
 """ Module: Shared Functions 
     Description: SharedFunctions.py contains functions used by multiple other
@@ -30,6 +32,10 @@ import re
         selectKeyswithAndOrs - provides the list of keys which match the
                                criteria associated with a specific set of 
                                values with ands/ors
+                               
+        generateNewRows: Creates a new row/entry based on either a user 
+                         supplied key (used in InputFile.py, Insert.py)
+                      
 """
 
 
@@ -253,7 +259,6 @@ def findMatchingKeys(values, dynamicDB):
     """
 
     selectedKeys = []
-    print(values)
     # If the key-value to delete is simply identifiable by a key, we simply
     # mark that key for deletion.
     if len(values) % 2 == 1:
@@ -326,3 +331,24 @@ def selectKeyswithAndOrs(matches, dynamicDB):
         print("Sorry, nothing in the store matches! Check your input or "
               "column types.")
     return selectedKeys
+
+def generateRandomKey():
+        """ generateRandomKey generates a random key to be used when inserting
+        new values to the dictionary key value store.
+
+        This is called if the user does not specify a key to insert with or if
+        the key the user supplies is already in the key value store.
+
+        No keyword arguments
+
+        Return values:
+        key -- a randomly generated key
+        """
+
+        key = 'row-' + ''.join(random.choices(string.ascii_lowercase +
+                                              string.digits, k=4))
+        key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
+        key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        key = key + ''.join(random.choices('!@#$%^&~_-.+', k=1))
+        key = key + ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
+        return key

@@ -4,6 +4,8 @@ import os.path
 import json
 import ast
 from jsonpath_ng import parse
+import SharedFunctions
+import sys
 
 """ Module: InputFile
     Description: holds all information relating to the input file, especially
@@ -55,7 +57,6 @@ class inputFile:
         self.whereData = whereData
         self.typesSet = []
         self.name, self.type = os.path.splitext(name)
-
 
     def findTheData(self, measurements):
         """ findTheData retrieves a viable candidate for data.
@@ -222,7 +223,8 @@ class inputFile:
             # Free or not? 0 indicates not free, 1 indicates free
             items = dict(isFree='false', position=positionCounter)
             values = dict()
-            for itm, type1 in zip(range(skipItems, len(self.typesSet) + skipItems), self.typesSet):
+            for itm, type1 in zip(range(skipItems, len(self.typesSet) + skipItems),
+                                  self.typesSet):
                 values[type1] = measurement[itm]
             items['data'] = values
             measurementStore[measurement[0]] = items

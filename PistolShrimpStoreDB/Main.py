@@ -312,7 +312,7 @@ class pistolShrimpStore:
                 continue
             else:
                 # handle input here
-                handleValue = self.handleInput(n)
+                handleValue = self.handleInput(n.lower())
 
                 # Check the type of return value. If the value is of type
                 # None, the key value store is to be updated. The actual
@@ -391,20 +391,9 @@ def specifyOutputFile():
 
     # Make sure the output file is valid.
     read = False
-    while not read:
-        try:
-            if len(DBFile) == 0:
-                DBFile = 'PistolShrimpStoreDB.bin'
-            with open(DBFile, 'w') as file:
-                read = True
-        except IOError:
-            # In the case the file cannot be created, the user is
-            # asked if they changed their mind and want to use the
-            # default file instead.
-            DBFile = input("Sorry, this path seems to be invalid."
-                           " Would you still like to create a custom file? "
-                           " Again, type its name here, else, hit enter.\n")
-
+    if len(DBFile) == 0:
+        DBFile = 'PistolShrimpStoreDB.bin'
+    # TODO: Fix checking whether output file is valid
     return DBFile
 
 

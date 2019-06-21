@@ -35,7 +35,7 @@ OutputFile.py contains functions specifically to write to the intended storage f
 Insert Class holds all information relating to inserts, including processing input.
 
 #### Functions:
-- generateRandomKey: Generates a random key if the user does not supply one or the user supplied one exists in the key value store
+- generateRandomKey: Generates a random key if the user does not supply one or the user supplied one exists in the key value store (now moved to SharedFunctions as InputFile.py uses it too)
 - generateNewRows: Creates a new row/entry based on either a user supplied key
 - handleInserts: parses matches to input used to insert a new row
 
@@ -73,6 +73,8 @@ Search.py contains functions specifically to handle Search and Find input comman
 SharedFunctions.py contains functions used by multiple other modules.
 
 ### Functions:     
+- generateRandomKey: Generates a random key if the user does not supply one or the user supplied one exists in the key value store
+
 - spaceMatches - Used to separate out column types and values in commands with commas (Used in Delete.py, Insert.py, Search.py, Selects.py, Update.py)
                        
 - conjMatches - Used to separate out column types and values in commands containing ands and ors (Used in Delete.py, Search.py, Select.py)
