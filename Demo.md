@@ -36,5 +36,5 @@ Here is a following demo for AirQualityMeasures.json as the input file (don't wo
 
 11. Find:
 - FIND KEY tmj3.7qu6.kbc
-- FIND 0.8 VALUES Selby AND Teas
+- FIND 0.7 VALUES Selby AND Teas
 - FIND KEY AND VALUES 0.9 statenam=Connecicut

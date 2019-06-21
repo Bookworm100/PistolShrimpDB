@@ -9,7 +9,7 @@ This project is for my CS 123 class, Projects in Database Systems. I'm implement
 PistolShrimpDB is a Python executable implemented as a key value store, a type of NoSQL database! Here's more information about this key value store, and how it works, usually in order of execution:
 
 - You can pick a JSON file to load in, and as long as it is in the proper format it should work. If you do not identify a JSON file (you simply press enter), the default should be PistolShrimpStoreDB.bin. If this has not been set up yet, you will receive an error message and be prompted to type in a file name again.
-- You can also specify what the data and column types (a way to label data such that each element within the entry (or row, as it will be called in this program) is assigned a label, making key value store commands such as selects easier – they are basically keys assigned to each of the items in each entry) are before loading the data
+- Note: column types and columns keys refer to the same item, which is the unique identifier, or key attached to each element within the row
 -  Next, you can specify which storage file to store to. We will eventually check to make sure the output file can be created before accepting it, and if you do not want to specify a file, you can press Enter and the default file, PistolShrimpStoreDB.bin, will be used.
 - Upon initialization, upon a message: "Now we can do awesome stuff! You can exit the program with exit or quit if you want your changes saved, or with abort if you don't. You can also save your changes with save and undo them with undo!,” you can do the following:
 	- save all changes so far without exiting the program since starting the program or the last save or undo (save)

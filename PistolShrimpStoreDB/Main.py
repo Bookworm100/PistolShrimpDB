@@ -430,21 +430,21 @@ def handleFileInput():
                            "Please type in a valid file name and/or path. " +
                            "\n")
 
-    # Ask the user if they wish to specify where in the file to find
-    # data or column information.
-    whereKey = input("If you would like to specify where the key or column "
-                     "types are, type it here, else, hit enter."
-                     "\n")
+    # TODO: Ask the user if they wish to specify where in the file to find
+    # data or column information. (Fix)
+    # whereKey = input("If you would like to specify where the key or column "
+    #                 "types are, type it here, else, hit enter."
+    #                 "\n")
 
-    whereData = input("If you would like to specify the keyword where the "
-                      "data is, type it here, else, hit enter."
-                      "\n")
+    # whereData = input("If you would like to specify the keyword where the "
+    #                  "data is, type it here, else, hit enter."
+    #                  "\n")
 
     # Set default values if they don't specify.
-    if len(whereKey) == 0:
-        whereKey = "columns"
-    if len(whereData) == 0:
-        whereData = "data"
+    # if len(whereKey) == 0:
+    whereKey = "columns"
+    # if len(whereData) == 0:
+    whereData = "data"
 
     return toLoadFile, whereKey, whereData
 

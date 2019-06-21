@@ -136,8 +136,9 @@ def handleSelects(matches, dynamicDB):
             # written to a file or terminal output.
             for match in expr.find(copy):
                 vals.add(str(match.value))
-            toWrite += str(list(vals))
-            new_input = 'trivials.txt'
+            if len(vals) > 0:
+                toWrite += str(list(vals))
+                new_input = 'trivials.txt'
             if toWrite == '':
                 print("Either the key or column key is not in the store, "
                       "your format is invalid, or something is not"

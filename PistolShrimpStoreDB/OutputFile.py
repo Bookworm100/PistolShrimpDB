@@ -153,16 +153,16 @@ def updateFileWithDeletes(storageDbFile, indicesDeleted):
     with open(storageDbFile, 'r+b') as open_file:
         line = open_file.readline()
         lenLine = len(line)
-        open_file.seek(indicesDeleted[0] * lenLine)
+        open_file.seek(indList[-1] * lenLine)
         lineList = open_file.readlines()
     # We sort the indices in reverse, and remove
     # the value (and line) corresponding to each index in the
     # storage file.
     for index in indList:
-        del lineList[index - indicesDeleted[0]]
+        del lineList[index - indList[-1]]
     # We write the modified lines back to the file.
     with open(storageDbFile, 'rb+') as open_file:
-        open_file.seek(indicesDeleted[0] * lenLine)
+        open_file.seek(indList[-1] * lenLine)
         open_file.writelines(lineList)
         open_file.truncate()
 

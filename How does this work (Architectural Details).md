@@ -4,7 +4,7 @@ The project has 9 modules total so far, which serve their own purposes and come 
 ## Module 1: Main
 Main.py is the main engine of this key value store. Also, Main.py contains two functions to handle user input to determine the input (JSON) file and the output (storage, usually .bin or .txt) file
 ### Classes contained:
-- renamed: a renamed class storing a tuple of a renamed column the name that that column type now bears.
+- renamed: a renamed class storing a tuple of a renamed column the name that that column type now bears. Note that renaming works as an update, so updated rows is used to keep track of renaming.
 - PistolShrimpStore - the class that represents the key value store and other variables necessary to keep the value store inserting, deleting, updating, selecting, searching, and finding correctly.
 
 ## Module 2: InputFile
